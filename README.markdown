@@ -12,7 +12,7 @@ I use Tomcat with Railo and have done the following:
 
 1. Download/expand the Zip archive from Github.
 2. Rename the downloaded folder to cfdynamo
-3. Inside the assets folder is a Zip archive containing the AWS and related JARs ... expand this archive (it will be named "aws")
+3. Inside the assets folder is a Zip archive containing the AWS and related JARs ... expand this archive (the expanded archive will be named "aws")
 4. Move the newly expanded "aws" folder^ into your {tomcat root}/lib folder.
 5. Open {tomcat root}/conf/catalina.properties and find the line with "common.loader="
 6. Add the following to the end of the common.loader= line: ,${catalina.home}/lib/aws,${catalina.home}/lib/aws/*.jar
@@ -24,7 +24,7 @@ If you use Adobe ColdFusion 9, the general idea is the same but here is how I co
 
 1. Download/expand the Zip archive from Github.
 2. Rename the downloaded folder to cfdynamo
-3. Inside the assets folder is a Zip archive containing the AWS and related JARs ... expand this archive (it will be named "aws")
+3. Inside the assets folder is a Zip archive containing the AWS and related JARs ... expand this archive (the expanded archive will be named "aws")
 4. Move the newly expanded "aws" folder^ into your {Adobe ColdFusion 9 Install Folder}/WEB-INF/lib folder.
 5. Open {Adobe ColdFusion 9 Install Folder}/runtime/bin/jvm.config and find the line with "java.class.path=" (there may be a better way to do this but this is how I got it working with the lest amount of headaches)
 6. Add the following to the end of the java.class.path= line: ,{application.home}/../wwwroot/WEB-INF/lib/aws
@@ -37,7 +37,7 @@ Other than the assets folder in this Git repository, which you need to address w
 
 ^The "aws" folder contains a series of JARs. These JARs can be dropped directly into your {tomcat root}/lib or {Adobe ColdFusion 9 Install Folder}/wwwroot/WEB-INF/lib/ folder with no updates to the catalina.properties file. 
 
-However, I prefer to keep my added JARs organized into their own folders for easier updates, etc.   
+However, I prefer to keep my added JARs organized into their own folders for easier updates, etc. Hence, the use of the "aws" folder to hold all of these JARs.
 
 ### Details to Come ###
 More details to come on the project ... just getting the initial repo setup today. 
