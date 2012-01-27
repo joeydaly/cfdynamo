@@ -1,11 +1,4 @@
-/**
- * @accessors = "true"
- * @alias = "com.imageaid.cfdynamo.DynamoClient"
- * @displayname = "DynamoClient"
- * @hint = "I handle interactions with an Amazon DynamoDB instance"
-*/
-
-component{
+component accessors="true" alias="com.imageaid.cfdynamo.DynamoClient" displayname="DynamoClient" hint="I handle interactions with an Amazon DynamoDB instance"{
 	
 	property name="aws_key" type="string" hint="The AWS Key";
 	property name="aws_secret" type="string" hint="The AWS Secret";

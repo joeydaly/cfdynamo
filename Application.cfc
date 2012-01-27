@@ -28,11 +28,16 @@ component {
 	 */
 	public boolean function onApplicationStart(){
 		application.aws = {};
-		application.aws.credentials = xmlParse(expandPath("com/imageaid/cfdynamo/aws_credentials.xml"));
-		application.aws.cfdynamo = new com.imageaid.cfdynamo.DynamoClient(
-			aws_key = application.aws.credentials.cfdynamo.access_key.xmlText, 
-			aws_secret = application.aws.credentials.cfdynamo.secret_key.xmlText
-		);		
+		try{
+			application.aws.credentials = xmlParse(expandPath("com/imageaid/cfdynamo/aws_credentials.xml"));
+			application.aws.cfdynamo = new com.imageaid.cfdynamo.DynamoClient(
+				aws_key = application.aws.credentials.cfdynamo.access_key.xmlText, 
+				aws_secret = application.aws.credentials.cfdynamo.secret_key.xmlText
+			);	
+		}	
+		catch(Any e){
+			writeLog(type="Error",text="#e.type# :: #e.message#", file="exception.log");
+		}
 		return true;
 	}
 
