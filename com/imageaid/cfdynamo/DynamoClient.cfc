@@ -8,7 +8,7 @@ component accessors="true" alias="com.imageaid.cfdynamo.DynamoClient" displaynam
 	variables.aws_key = "";
 	variables.aws_secret = "";
 
-	public com.imageaid.cfdynamo.DynamoClient function init(required string aws_key, required string aws_secret){
+	public DynamoClient function init(required string aws_key, required string aws_secret){
 		variables.aws_key = trim(arguments.aws_key);
 		variables.aws_secret = trim(arguments.aws_secret);
 		variables.aws_creds = createObject("java","com.amazonaws.auth.BasicAWSCredentials").init(variables.aws_key, variables.aws_secret);
