@@ -16,6 +16,72 @@ component accessors="true" alias="com.imageaid.cfdynamo.DynamoClient" displaynam
 		return this;
 	}
 	
+	public boolean function create_table(
+		required string table_name, required string pk_name='id', required string pk_type = 'hash', required string pk_value_type='int',
+		string pk_range_name, string pk_range_value_type, numeric read_capacity=5, numeric write_capacity=5
+	){
+		var result = true;
+		var read_capacity_casted = JavaCast("long",arguments.read_capacity);
+		var write_capacity_casted = JavaCast("long",arguments.write_capacity);
+		var primary_key_type = IIf(lcase(trim(arguments.pk_value_type)) == 'int' ? "N" : "S");
+		var hash_key = createObject(
+			"java",
+			"com.amazonaws.services.dynamodb.model.KeySchemaElement"
+			).init().withAttributeName("#arguments.pk_name#").withAttributeType("#primary_key_type#");
+		var key_schema = createObject("java","com.amazonaws.services.dynamodb.model.KeySchema").init(hash_key);
+        var provisioned_throughput = createObject("java","com.amazonaws.services.dynamodb.model.ProvisionedThroughput").init()
+            .withReadCapacityUnits(#read_capacity_casted#)
+            .withWriteCapacityUnits(#write_capacity_casted#);
+        var table_request = createObject(
+        	"java",
+        	"com.amazonaws.services.dynamodb.model.CreateTableRequest"
+        	).init().withTableName(trim(arguments.table_name)).withKeySchema(key_schema).withProvisionedThroughput(provisioned_throughput);
+        
+        try{
+        	variables.aws_dynamodb.createTable(table_request);
+        }
+        catch(Any e){
+        	result = false;
+        	writeLog(type="Error",text="#e.type# :: #e.message#", file="dynamodb.log");
+        }
+		return result;
+	}
+	
+	public boolean function update_table(required string table_name, required numeric read_capactiy, required numeric write_capacity){
+		var result = true;
+		var read_capacity_casted = JavaCast("long",arguments.read_capacity);
+		var write_capacity_casted = JavaCast("long",arguments.write_capacity);
+		var provisioned_throughput = createObject("java","com.amazonaws.services.dynamodb.model.ProvisionedThroughput").init()
+            .withReadCapacityUnits(#read_capacity_casted#)
+            .withWriteCapacityUnits(#write_capacity_casted#);
+		var update_table_request = createObject(
+			"java", 
+			"com.amazonaws.services.dynamodb.model.UpdateTableRequest"
+			).init().withTableName(trim(arguments.table_name)).withProvisionedThroughput(provisioned_throughput);
+        
+        try{
+        	variables.aws_dynamodb.updateTable(update_table_request);
+        }
+        catch(Any e){
+        	result = false;
+        	writeLog(type="Error",text="#e.type# :: #e.message#", file="dynamodb.log");
+        }
+		return result;
+	}
+	
+	public boolean function delete_table(required string table_name){
+		var result = true;
+		var delete_table_request = createObject("java","com.amazonaws.services.dynamodb.model.DeleteTableRequest").init().withTableName(trim(arguments.table_name));
+        try{
+        	variables.aws_dynamodb.deleteTable(delete_table_request);
+        }
+        catch(Any e){
+        	result = false;
+        	writeLog(type="Error",text="#e.type# :: #e.message#", file="dynamodb.log");
+        }
+        return result;
+	}
+	
 	public array function list_tables(string start_table, numeric limit=1){
 		var table_request = createObject("java","com.amazonaws.services.dynamodb.model.ListTablesRequest").init();	
 		table_request.setLimit(arguments.limit);
