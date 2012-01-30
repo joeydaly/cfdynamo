@@ -47,8 +47,9 @@ component accessors="true" alias="com.imageaid.cfdynamo.DynamoClient" displaynam
 		return result;
 	}
 	
-	public boolean function update_table(required string table_name, required numeric read_capactiy, required numeric write_capacity){
+	public boolean function update_table(required string table_name, required numeric read_capacity, required numeric write_capacity){
 		var result = true;
+		var call_result = "";
 		var read_capacity_casted = JavaCast("long",arguments.read_capacity);
 		var write_capacity_casted = JavaCast("long",arguments.write_capacity);
 		var provisioned_throughput = createObject("java","com.amazonaws.services.dynamodb.model.ProvisionedThroughput").init()
@@ -60,7 +61,7 @@ component accessors="true" alias="com.imageaid.cfdynamo.DynamoClient" displaynam
 			).init().withTableName(trim(arguments.table_name)).withProvisionedThroughput(provisioned_throughput);
         
         try{
-        	variables.aws_dynamodb.updateTable(update_table_request);
+        	call_result = variables.aws_dynamodb.updateTable(update_table_request);
         }
         catch(Any e){
         	result = false;
