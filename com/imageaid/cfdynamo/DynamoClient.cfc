@@ -23,7 +23,7 @@ component accessors="true" alias="com.imageaid.cfdynamo.DynamoClient" displaynam
 		var result = true;
 		var read_capacity_casted = JavaCast("long",arguments.read_capacity);
 		var write_capacity_casted = JavaCast("long",arguments.write_capacity);
-		var primary_key_type = IIf(lcase(trim(arguments.pk_value_type)) == 'int' ? "N" : "S");
+		var primary_key_type = ( lcase(trim(arguments.pk_value_type)) == 'int' ? "N" : "S" );
 		var hash_key = createObject(
 			"java",
 			"com.amazonaws.services.dynamodb.model.KeySchemaElement"
