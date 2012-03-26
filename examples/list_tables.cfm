@@ -5,7 +5,7 @@
 			aws_key = credentials.cfdynamo.access_key.xmlText, 
 			aws_secret = credentials.cfdynamo.secret_key.xmlText
 		);	
-		my_tables = cfdynamo.list_tables(limit=1);
+		my_tables = cfdynamo.list_tables();
 	}
 	catch(Any e){
 		my_tables = e;

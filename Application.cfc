@@ -29,7 +29,7 @@ component {
 	public boolean function onApplicationStart(){
 		application.aws = {};
 		try{
-			application.aws.credentials = xmlParse(expandPath("com/imageaid/cfdynamo/aws_credentials.xml"));
+			application.aws.credentials = xmlParse(expandPath("/cfdynamo/com/imageaid/cfdynamo/aws_credentials.xml"));
 			application.aws.cfdynamo = new com.imageaid.cfdynamo.DynamoClient(
 				aws_key = application.aws.credentials.cfdynamo.access_key.xmlText, 
 				aws_secret = application.aws.credentials.cfdynamo.secret_key.xmlText
@@ -88,7 +88,7 @@ component {
 	 * @hint ColdFusion received a request for a non-existent page.
 	 */
 	public boolean function onMissingTemplate(String targetPage) {
-
+		
 		return true;
 	}
 

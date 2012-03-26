@@ -100,6 +100,17 @@ component accessors="true" alias="com.imageaid.cfdynamo.DynamoClient" displaynam
 		return variables.aws_dynamodb.putItem(put_item_request);
 	}
 	
+	public any function get_item(required string table_name, required string fields){
+		var key = createObject("java", "com.amazonaws.services.dynamodb.model.Key").init().withHashKeyElement(new AttributeValue().withN("120"))
+		var get_item_request = createObject(
+			"java", "GetItemRequest"
+		).init().withTableName(trim(arguments.table_name)).withKey().withAttributesToGet(trim(arguments.fields));
+		result = client.getItem(getItemRequest);		
+		// Check the response.
+		System.out.println("Printing item after retrieving it....");
+		printItem(result.getItem());            
+	}
+	
 	private any function struct_to_dynamo_map(required struct cf_structure){
 		var dynamo_map = createObject("java","java.util.HashMap").init();
 		for( key in arguments.cf_structure ){
