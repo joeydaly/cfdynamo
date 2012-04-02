@@ -27,34 +27,43 @@
         </ul>
       </header>
       <section>
-        <h3>Welcome to GitHub Pages.</h3>
-
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
-
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
-
-<h3>Designer Templates</h3>
-
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact support@github.com and we’ll help you sort it out.</p>
-      </section>
-    </div>
+         
+      <h3>CFDynamo</h3>
+      <p>CFDynamo is a typically lame-named ColdFusion wrapper for the Amazon DynamoDB Java API.</p> 
+      <h3>Goal</h3>
+      <p>To build a simple but effective CFC wrapper for the Java AWS SDK for DynamoDB.</p>
+      <h3>Setup</h3>
+      <p>Setup is faily simple, with the only realy consideration being the implementation for the Java AWS SDK on your Railo/ACF instance.</p>
+      <p>I use Tomcat with Railo and have done the following:</p>
+      <ol> 
+        <li>Download/expand the Zip archive from Github</li>
+        <li>Rename the downloaded folder to cfdynamo</li>
+        <li>Inside the assets folder is a Zip archive containing the AWS and related JARs ... expand this archive (the expanded archive will be named "aws")</li>
+        <li>Move the newly expanded "aws" folder^ into your {tomcat root}/lib folder</li>
+        <li>Open {tomcat root}/conf/catalina.properties and find the line with "common.loader="</li>
+        <li>Add the following to the end of the common.loader= line: ,${catalina.home}/lib/aws,${catalina.home}/lib/aws/*.jar</li>
+        <li>Add the "cfdynamo" folder and its content to your web application or web root (you can remove the examples and other files, not in the com folder, if you like)</li>
+        <li>Add a mapping to "cfdynamo" in your web administrator ... the sample app attemtps to create a /cfdynamo mapping for you, but, if you're going to use this in an application, it's probably best to just add the mapping the the administrator</li>
+        <li>Retart Tomcat/Railo</li> 
+      </ol>
+      <p>If you use Adobe ColdFusion 9, the general idea is the same but here is how I configured ACF9 (stand-alone server) to load my AWS JARs:</p> 
+        <ol>
+          <li>Download/expand the Zip archive from Github</li>
+          <li>Rename the downloaded folder to cfdynamo</li>
+          <li>Inside the assets folder is a Zip archive containing the AWS and related JARs ... expand this archive (the expanded archive will be named "aws")</li>
+          <li>Move the newly expanded "aws" folder^ into your {Adobe ColdFusion 9 Install Folder}/WEB-INF/lib folder</li>
+          <li>Open {Adobe ColdFusion 9 Install Folder}/runtime/bin/jvm.config and find the line with "java.class.path=" (there may be a better way to do this but this is how I got it working with the lest amount of headaches)</li>
+          <li>Add the following to the end of the java.class.path= line: ,{application.home}/../wwwroot/WEB-INF/lib/aws</li>
+          <li>Add the "cfdynamo" folder and its content to your web application (you can remove the examples and other files if you like)</li>
+          <li>Add a mapping to "cfdynamo" in your web administrator ... the sample app attemtps to create a /cfdynamo mapping for you, but, if you're going to use this in an application, it's probably best to just add the mapping the the administrator</li>
+          <li>Retart ACF 9</li>
+        </ol>
+      <h3>Sample App</h3>
+      <p>Other than the assets folder in this Git repository, which you need to address with the steps above, you can clone the files into a directory in your web root and just get going. Sort of ... you still have to create a table in the AWS console (going to add the createTable wrapper shortly).</p> 
+      <p><small>^</small> The "aws" folder contains a series of JARs. These JARs can be dropped directly into your {tomcat root}/lib or {Adobe ColdFusion 9 Install Folder}/wwwroot/WEB-INF/lib/ folder with no updates to the catalina.properties file.</p>
+      <p>However, I prefer to keep my added JARs organized into their own folders for easier updates, etc. Hence, the use of the "aws" folder to hold all of these JARs.</p>
+      <h3>Details to Come</h3>
+      <p>More details to come on the project.</p>
     <footer>
       <p>Project maintained by <a href="https://github.com/imageaid">imageaid</a></p>
       <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
