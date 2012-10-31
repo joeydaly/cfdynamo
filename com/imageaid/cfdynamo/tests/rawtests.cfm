@@ -40,9 +40,9 @@
 	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- LIST TABLES --
-	// writeOutput("Listing tables...<br/>");
-	// writeDump(ddbc.listTables());
-	// writeOutput("SUCCESS<br/><br/>");
+	writeOutput("Listing tables...<br/>");
+	writeDump(ddbc.listTables());
+	writeOutput("SUCCESS<br/><br/>");
 
 	// -- TABLE INFO --
 	// writeOutput("Getting details for table #sTableName#...<br/>");

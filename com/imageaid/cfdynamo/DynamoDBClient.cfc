@@ -215,19 +215,29 @@ component
 	}
 	
 
-	public array function listTables(
-		string start_table
-		, numeric limit=20)
+	/**
+	* @displayname List Tables
+	* @hint Lists all the tables present in the DynamoDB account.  If no limit is provided, all tables are listed. You may optionally provide the name of a table to start the result set from in order to support paginated results.
+	*/
+	public Array function listTables(
+		string startTable hint="Optional. If provided, the result set's page will begin with this table."
+		, numeric limit=20 hint="Optional, defaults to 20. Specifies the maximum number of items in the result set, for pagination.")
 	{
-		var table_request = createObject("java","com.amazonaws.services.dynamodb.model.ListTablesRequest").init();
-		table_request.setLimit(arguments.limit);
-		// table_request.withExclusiveStartTableName(javaCast("null", ""));
-
-		if (structKeyExists(arguments,"start_table"))
+		// Create a validated and sanitized copy of the arguments scope to be used in this function
+		var pargs = {};
+		if (structKeyExists(arguments, "startTable")) pargs["startTable"] = trim(arguments.startTable);
+		if (structKeyExists(arguments, "limit")) pargs["limit"] = arguments.limit;
+		// Setup the list request
+		var awsTableRequest = createObject("java","com.amazonaws.services.dynamodb.model.ListTablesRequest")
+			.init()
+			.withLimit(pargs.limit);
+		// Conditionally add in the start table name, if it was provided
+		if (structKeyExists(pargs, "startTable"))
 		{
-			table_request.setExclusiveStartTableName(trim(arguments.start_table));
+			awsTableRequest.setExclusiveStartTableName(arguments.startTable);
 		}
-		return variables.awsDynamoDBClient.listTables(table_request).getTableNames();
+		// Make the call to AWS, returning the result
+		return variables.awsDynamoDBClient.listTables(awsTableRequest).getTableNames();
 	}
 	
 
