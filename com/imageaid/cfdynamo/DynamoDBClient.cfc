@@ -265,11 +265,10 @@ component
 
 	/**
 	* @author Adam Bellas
-	* @output false
 	* @displayname Batch Put Items
 	* @hint Utilizes the batch put capabilities of the AWS Java SDK.  The items are provided in the form of an array of structs.  The structs are the items to be batch inserted into the table specified.
 	*/
-	public Any function batchPutItems(
+	public Void function batchPutItems(
 		required String tableName hint="Name of the table into which the provided data will be inserted as a record."
 		, required Array items hint="Collection (array) of Structs that are each containing the data that is to become new records in the specified table.")
 	{
@@ -289,20 +288,23 @@ component
 		for (var item in pargs.items)
 		{
 			// Create the WriteRequest
-			var oWriteRequest = createObject("java", "com.amazonaws.services.dynamodb.model.WriteRequest")
+			var awsWriteRequest = createObject("java", "com.amazonaws.services.dynamodb.model.WriteRequest")
 				.init()
 				.withPutRequest(createObject("java", "com.amazonaws.services.dynamodb.model.PutRequest")
 					.init()
 					.withItem(struct_to_dynamo_map(item))
 				);
 			// Now append it to our batch array
-			arrayAppend(requestItems[pargs.tableName], oWriteRequest);
+			arrayAppend(requestItems[pargs.tableName], awsWriteRequest);
 		}
-		batchWriteItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.BatchWriteItemRequest").init();
-		batchWriteItemRequest.setRequestItems(requestItems);
+		// Setup the request, but don't add any items to it yet.  That's done inside the while loop.
+		awsBatchWriteItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.BatchWriteItemRequest").init();
 		do {
-			// batchWriteItemRequest.setRequestItems(aWriteRequestBatch);
-			result = variables.awsDynamoDBClient.batchWriteItem(batchWriteItemRequest);
+			awsBatchWriteItemRequest.setRequestItems(requestItems);
+			result = variables.awsDynamoDBClient.batchWriteItem(awsBatchWriteItemRequest);
+			// Assign the remaining items that didn't get processed in this iteration of the loop
+			// to the requestItems var that feeds back into the loop at the top.
+			requestItems = result.getUnprocessedItems();
 		} while (result.getUnprocessedItems().size() > 0);
 		// Nothing to return
 		return;

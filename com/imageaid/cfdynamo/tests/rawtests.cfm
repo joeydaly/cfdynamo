@@ -12,9 +12,9 @@
 
 
 	// -- CHOOSE A TABLE BY UNCOMMENTING ONE --
-	// sTableName = "cfdynamotabletest";
+	sTableName = "cfdynamotabletest";
 	// sTableName = "temptest01";
-	sTableName = "Forum";
+	// sTableName = "Forum";
 	// sTableName = "ProductCatalog";
 	// sTableName = "Reply";
 	// sTableName = "Reply";
@@ -50,20 +50,23 @@
 	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- PUT ITEM --
-	writeOutput("Here's a sample object we will create for insertion.<br/>");
-	oSample = {"Name":"crackerbarrel", "payload":["foo","bar","knee","toes"], "likeChocolate":"false","cows":93};
-	writeDump(var=oSample, label="Sample Data");
-	writeOutput("Putting our sample record into the table #sTableName#...<br/>");
-	writeDump(ddbc.putItem(tableName=sTableName, item=oSample));
-	writeOutput("SUCCESS<br/><br/>");
+	// writeOutput("Here's a sample object we will create for insertion.<br/>");
+	// oSample = {"Name":"crackerbarrel", "payload":["foo","bar","knee","toes"], "likeChocolate":"false","cows":93};
+	// writeDump(var=oSample, label="Sample Data");
+	// writeOutput("Putting our sample record into the table #sTableName#...<br/>");
+	// writeDump(ddbc.putItem(tableName=sTableName, item=oSample));
+	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- BATCH PUT ITEM --
-	// writeOutput("Here are three sample objects we will create for batch insertion.<br/>");
 	// aSampleItems = [
 	// 	{"id":1000, "Name":"gumdrops", "payload":["alpha","beta","delta","gamma"], "likeChocolate":"true","cows":10}
 	// 	, {"id":1001, "Name":"shoemonkey", "payload":["red","orange","yellow","green"], "likeChocolate":"false","cows":0}
 	// 	, {"id":1002, "Name":"rimbot", "payload":["peter","paul","mary","puff"], "likeChocolate":"true","cows":42752659}
+	// 	, {"id":1003, "Name":"pony", "payload":["peter","paul","mary","puff"], "likeChocolate":"true","cows":559}
+	// 	, {"id":1004, "Name":"swiss", "payload":["peter","paul","mary","puff"], "likeChocolate":"false","cows":1337}
+	// 	, {"id":1005, "Name":"Carl", "payload":["peter","paul","mary","puff"], "likeChocolate":"false","cows":27}
 	// ];
+	// writeOutput("Here are #arrayLen(aSampleItems)# sample objects we will create for batch insertion.<br/>");
 	// writeDump(var=aSampleItems, label="Sample Data for insertion", expand=false);
 	// writeOutput("Batch putting our sample data into the table #sTableName#...<br/>");
 	// writeDump(ddbc.batchPutItems(tableName=sTableName, items=aSampleItems));
