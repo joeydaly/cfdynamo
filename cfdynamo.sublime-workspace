@@ -1,0 +1,852 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"cf",
+				"cf_structure"
+			],
+			[
+				"put_item",
+				"put_item_request"
+			],
+			[
+				"put_ite",
+				"put_item_request"
+			],
+			[
+				"aws_",
+				"aws_dynamodb"
+			],
+			[
+				"avail",
+				"availableForSearch"
+			],
+			[
+				"cfc",
+				"cfcname"
+			],
+			[
+				"return",
+				"returnformat"
+			],
+			[
+				"oEndpoi",
+				"oEndpointDesc"
+			],
+			[
+				"a",
+				"abort=\"true\"	abort"
+			],
+			[
+				"GMT",
+				"GMTOffset"
+			],
+			[
+				"resou",
+				"resourceVersion"
+			],
+			[
+				"resour",
+				"resourceType"
+			],
+			[
+				"resource",
+				"resourceShare"
+			],
+			[
+				"rating",
+				"ratingSummary"
+			],
+			[
+				"instant",
+				"instantMessageService"
+			],
+			[
+				"Conten",
+				"ContentStandard"
+			],
+			[
+				"previou",
+				"previousVersion"
+			],
+			[
+				"Resource",
+				"ResourceVersion"
+			],
+			[
+				"educatio",
+				"educationSegment"
+			],
+			[
+				"cours",
+				"coursesTaught"
+			],
+			[
+				"educa",
+				"educationSegment"
+			],
+			[
+				"license",
+				"licenseDeedURL"
+			],
+			[
+				"licen",
+				"licenseDeedURL"
+			],
+			[
+				"parent",
+				"parentEntityUUID"
+			],
+			[
+				"paren",
+				"parentSubject"
+			],
+			[
+				"availa",
+				"availableForSearch"
+			],
+			[
+				"lastModif",
+				"lastModifiedBy"
+			],
+			[
+				"created",
+				"createdPlatformVersion"
+			],
+			[
+				"create",
+				"createdBy"
+			],
+			[
+				"Instan",
+				"InstantMessageService"
+			],
+			[
+				"Soca",
+				"SocialNetwork"
+			],
+			[
+				"retu",
+				"returned"
+			],
+			[
+				"minimum",
+				"minimumPoints"
+			],
+			[
+				"image",
+				"imageURL"
+			],
+			[
+				"las",
+				"lastModifiedSystem"
+			],
+			[
+				"last",
+				"lastModifiedBy"
+			],
+			[
+				"lastMo",
+				"lastModifiedAdmin"
+			],
+			[
+				"clas",
+				"className"
+			],
+			[
+				"coll",
+				"collapsible"
+			],
+			[
+				"arrayS",
+				"arraySort	fn. (cfscript)"
+			],
+			[
+				"attachment",
+				"attachmentUUID"
+			],
+			[
+				"li",
+				"line-height"
+			],
+			[
+				"backgr",
+				"background-color"
+			],
+			[
+				"list-",
+				"list-style-type"
+			],
+			[
+				"postal",
+				"postalCode"
+			],
+			[
+				"Adobe",
+				"AdobeEXEntity"
+			],
+			[
+				"key",
+				"keywords"
+			],
+			[
+				"ISTENETS",
+				"ISTENETSStandards"
+			],
+			[
+				"class",
+				"classReps"
+			],
+			[
+				"void",
+				"Void"
+			],
+			[
+				"colla",
+				"collapsibleSection"
+			],
+			[
+				"text",
+				"text-transform"
+			],
+			[
+				"c",
+				"country"
+			],
+			[
+				"pos",
+				"postalCode"
+			],
+			[
+				"memb",
+				"memberId"
+			],
+			[
+				"var",
+				"variables"
+			],
+			[
+				"Create",
+				"CreatedBy_Id"
+			],
+			[
+				"replaceNoCas",
+				"reReplaceNoCase	fn. (cfscript)"
+			],
+			[
+				"reReplace",
+				"reReplaceNoCase	fn. (cfscript)"
+			],
+			[
+				"data",
+				"datasource"
+			],
+			[
+				"structKey",
+				"structKeyExists	fn. (cfscript)"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "index.cfm",
+			"settings":
+			{
+				"buffer_size": 467,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "com/imageaid/cfdynamo/DynamoClient.cfc",
+			"settings":
+			{
+				"buffer_size": 8560,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "samples/delete_table.cfm",
+			"settings":
+			{
+				"buffer_size": 1406,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "samples/list_tables.cfm",
+			"settings":
+			{
+				"buffer_size": 673,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "samples/put_item.cfm",
+			"settings":
+			{
+				"buffer_size": 1638,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "WEB-INF/web.xml",
+			"settings":
+			{
+				"buffer_size": 26453,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "<h3>Before the script</h3>\n<cfscript>\n\n	// Arrays = createObject(\"java\", \"java.util.Arrays\");\n	aws_creds = createObject(\n		 \"java\"\n		,\"com.amazonaws.auth.BasicAWSCredentials\")\n		.init(\n			 javaCast(\"string\", \"AKIAI7SMV7NVTTLTGO3Q\")\n			,javaCast(\"string\", \"	\"));\n	writeDump(var=aws_creds, expand=false, label=\"Basic AWS Credentials\");\n	\n/*\nvar AWSCredentials = createObject(\"java\",\"com.amazonaws.auth.BasicAWSCredentials\").init(arguments.config.awsAccessKey,arguments.config.awsSecretKey);		\n		var AWSClient = createObject(\"java\",'com.amazonaws.services.elasticache.AmazonElastiCacheClient').init(AWSCredentials);\n*/\ntry{\n	// aws_dynamodb = createObject(\"java\",\"com.amazonaws.services.dynamodb.AmazonDynamoDBClient\").init(aws_creds);\n	aws_dynamodb = createObject(\"java\",\"com.amazonaws.services.dynamodb.AmazonDynamoDBClient\").init();\n	// writeDump(var=aws_dynamodb, expand=false);\n\n}\ncatch(Any e) {\n	writeDump(e);\n	abort;\n}\n\nwriteDump(\"woopee!\"); abort;\n\n\n\n	table_request = createObject(\"java\",\"com.amazonaws.services.dynamodb.model.ListTablesRequest\").init();\n	writeDump(var=table_request, expand=false);\n\n	foo = aws_dynamodb.listTables(table_request);\n	writeDump(var=foo, expand=false);\n\n	put_item_request = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.PutItemRequest\").init();\n	put_item_request.setTableName(\"Reply\");\n	sampleData = {};\n	sampleData[\"Id\"] = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.AttributeValue\").init().withS(\"Adam Test 01\");\n	sampleData[\"ReplyDateTime\"] = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.AttributeValue\").init().withS(\"2012-12-22T00:00:00.000Z\");\n	sampleData[\"Message\"] = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.AttributeValue\").init().withS(\"This is a test.\");\n	sampleData[\"PostedBy\"] = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.AttributeValue\").init().withS(\"Adam Bellas\");\n	sampleData[\"Score\"] = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.AttributeValue\").init().withN(27);\n	sampleData[\"Score\"] = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.AttributeValue\").init().withSS([\"My\",\"test\"]);\n	writeDump(var=sampleData, expand=false);\n\n	put_item_request.setItem(sampleData);\n	writeDump(var=put_item_request, expand=false);\n\n	put_item_response = variables.aws_dynamodb.putItem(put_item_request);\n	writeDump(var=put_item_response, expand=false);\n\n</cfscript>\n<h3>After the script</h3>",
+			"file": "adamtest.cfm",
+			"file_size": 2473,
+			"file_write_time": 1351264314000000,
+			"settings":
+			{
+				"buffer_size": 2434,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 267.0,
+		"selected_items":
+		[
+			[
+				"Package Control: ",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 449.0
+	},
+	"console":
+	{
+		"height": 125.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/abellas/eclipse-workspace/cfdynamo/_Application.cfc",
+		"/Users/abellas/eclipse-workspace/cfdynamo/com/imageaid/cfdynamo/aws_credentials.xml",
+		"/Users/abellas/eclipse-workspace/cfdynamo/samples/create_table.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/samples/list_tables.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/samples/put_item.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/samples/update_table.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/adamtest.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/Application.cfc",
+		"/Users/abellas/eclipse-workspace/cfdynamo/com/imageaid/cfdynamo/aws_credentials_template.xml",
+		"/Users/abellas/eclipse-workspace/cfdynamo/examples/create_table.cfm",
+		"/Users/abellas/Desktop/temp.txt",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/javascripts/documentation.js",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/application.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/endpoints/Lists.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/documentation/index.cfm",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/WEB-INF/urlrewrite.xml",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/endpoints/School.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/WEB-INF/web.xml",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/endpoints/Discussion.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Attachment.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/factory/SupportObject.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/endpoints/Resource.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/endpoints/Subject.cfc",
+		"/Users/abellas/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/documentation/endpoint.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/documentation/entity.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/documentation/detail.cfm",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/endpoints/Member.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Resource.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/AgeLevel.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/ResourceVersion.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Member.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/2.0/endpoints/Resource.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/2.0/endpoints/Member.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/2.0.0.0/endpoints/Member.cfc",
+		"/Applications/apache-tomcat-7.0.29/conf/server.xml",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/endpoints/Message.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/services/Member.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/includes/functions.cfm",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/services/Logger.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/services/School.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/services/Notification.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/services/List.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/services/Scheduler.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/services/Resource.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/services/Gamification.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/APIKey.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Badge.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Link.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/RatingSummary.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/SocialNetwork.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Subject.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/services/Message.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/documentation/application.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/index.cfm",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Comment.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/AdobeEXEntity.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/ReputationLevel.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/documentation/entity.cfm",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/TimeZone.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Language.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/InstantMessageService.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Group.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/CopyLicense.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/ContentStandard.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Region.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Address.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/ScoringRule.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/School.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Tag.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/ResourceType.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Product.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/ResourceShare.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Rating.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Notification.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Category.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Certification.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/documentation/SCHOOL-SERVICES.txt",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/documentation/MEMBER-SERVICES.txt",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/documentation/RESOURCE-SERVICES.txt",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/includes/header.cfm",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/tools/tools.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/ResourceStatus.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/RelatedContent.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Status.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/styles/documentation.css",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/tools/index.cfm",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/javascripts/tools.js",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Standard.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/License.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/business/Link.cfm",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/javascripts/home.js",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/includes/header.cfm.html",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/includes/footer.cfm",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/tools/tools.js",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/README.md",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/crossdomain.xml",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/WEB-INF/cfusion/lib/log4j.properties",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/WEB-INF/urlrewrite.xml~",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex/com/adobe/ex/services/Member.cfc",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex/com/adobe/ex/services/Resource.cfc",
+		"/Applications/apache-tomcat-7.0.29/webapps/ROOT/index.cfm",
+		"/Users/abellas/Downloads/adobeeducation/adduse.sh",
+		"/Users/abellas/Downloads/adobeeducation/combine.sh",
+		"/Users/abellas/eclipse-workspace/wb-adobe-ex/com/adobe/ex/business/Member.cfc",
+		"/Users/abellas/Library/Application Support/Sublime Text 2/Packages/User/Package Control.sublime-settings",
+		"/Users/abellas/Google Drive/Wrecking Ball/Adobe EX API Endpoints.txt",
+		"/Users/abellas/Documents/prepend.sh",
+		"/Users/abellas/Pictures/info.txt"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"writeLog",
+			">",
+			"struct_to_dynamo_map",
+			"set_timestamp",
+			"HMAC_SHA256",
+			"aws_signature",
+			"variables",
+			"forum",
+			" category",
+			"   * ",
+			"/search",
+			"search",
+			"qEntities",
+			"oSvcMetaData",
+			"Early Childhood",
+			" />",
+			"<cfset ",
+			"variables.",
+			" />",
+			"<cfset ",
+			"trace",
+			"security",
+			"delete",
+			"ul.endpoints",
+			"endpoint",
+			"method",
+			"prop",
+			"Prop",
+			"prop",
+			"serviceName",
+			"services",
+			"Entity",
+			"entity",
+			"Entity",
+			"functions",
+			"services",
+			"@roles",
+			"categories",
+			"stAddress",
+			"sort",
+			"list",
+			"speccomplete",
+			"total",
+			"unfollow",
+			"followmem",
+			"Update member",
+			"imService",
+			"imservice",
+			"imService",
+			"imservice",
+			"imService",
+			"imServiceId",
+			"socialNetworkId",
+			"schoolId",
+			"void",
+			"linkId",
+			"attachmentId",
+			"delete member",
+			"member's",
+			"read",
+			"memberId",
+			"oEntity",
+			"sort",
+			"shareId",
+			"attachmentId",
+			"commentId",
+			"versionId",
+			"resourceId",
+			"attachment_id",
+			"document_id",
+			"{id}",
+			"/documents",
+			"this",
+			"(), ",
+			":\"2\"",
+			"member_id",
+			"user",
+			"User",
+			"user",
+			"User",
+			"user",
+			"User",
+			"user",
+			"User",
+			"user",
+			"User",
+			"user",
+			"User",
+			"user",
+			"User",
+			"user",
+			"User",
+			"user",
+			"User",
+			"user",
+			"User",
+			"member",
+			"documents",
+			"member_id",
+			"user",
+			"oDynamicAttributes",
+			"instantMessage",
+			"social",
+			"oDynamicAttributes",
+			"//	",
+			"outer",
+			"result",
+			"qResource.result",
+			"qResource",
+			"ENDPOINT: "
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"qResource",
+			"qResource.",
+			""
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "index.cfm",
+					"settings":
+					{
+						"buffer_size": 467,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								393,
+								393
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/ColdFusion/HTML+CFML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "com/imageaid/cfdynamo/DynamoClient.cfc",
+					"settings":
+					{
+						"buffer_size": 8560,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								8560
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/ColdFusion/ColdFusionCFC.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1955.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "samples/delete_table.cfm",
+					"settings":
+					{
+						"buffer_size": 1406,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								471,
+								471
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/ColdFusion/HTML+CFML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "samples/list_tables.cfm",
+					"settings":
+					{
+						"buffer_size": 673,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								279,
+								319
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/ColdFusion/HTML+CFML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "samples/put_item.cfm",
+					"settings":
+					{
+						"buffer_size": 1638,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								838,
+								838
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/ColdFusion/HTML+CFML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "WEB-INF/web.xml",
+					"settings":
+					{
+						"buffer_size": 26453,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								20319,
+								20319
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/XML/XML.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6737.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "adamtest.cfm",
+					"settings":
+					{
+						"buffer_size": 2434,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2142,
+								2129
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/ColdFusion/HTML+CFML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 237.0,
+	"status_bar_visible": true
+}

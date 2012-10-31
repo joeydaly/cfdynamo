@@ -2,3 +2,4 @@ com/imageaid/cfdynamo/aws_credentials.xml
 .DS_Store
 quickie.cfm
 .project
+/aws_credentials.xml
