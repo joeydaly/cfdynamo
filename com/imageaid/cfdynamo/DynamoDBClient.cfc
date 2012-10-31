@@ -188,18 +188,29 @@ component
 	}
 	
 
+	/**
+	* @displayname Delete Table
+	* @hint Deletes the specified table. Use with care, there is no confirmation for this operation.  All data will be lost!
+	*/
 	public Void function deleteTable(
-		required String table_name)
+		required String tableName hint="Name of the table that is to be deleted")
 	{
-		var result = true;
-		var delete_table_request = createObject("java","com.amazonaws.services.dynamodb.model.DeleteTableRequest").init().withTableName(trim(arguments.table_name));
-        try{
-        	variables.awsDynamoDBClient.deleteTable(delete_table_request);
+		// Create a validated and sanitized copy of the arguments scope to be used in this function
+		var pargs = {};
+		pargs["tableName"] = trim(arguments.tableName);
+		// Build the delete table request that will be passed into the client
+		var awsDeleteTableRequest = createObject("java","com.amazonaws.services.dynamodb.model.DeleteTableRequest")
+			.init()
+			.withTableName(pargs.tableName);
+		// Attempt the deletion
+        try {
+        	var result = variables.awsDynamoDBClient.deleteTable(awsDeleteTableRequest);
         }
-        catch(Any e){
+        catch(Any e) {
         	writeLog(type="Error",text="#e.type# :: #e.message#", file="dynamodb");
         	rethrow;
         }
+        // Don't return anything. This could be enhanced to return the details of the table that was deleted, if necessary.
         return;
 	}
 	
