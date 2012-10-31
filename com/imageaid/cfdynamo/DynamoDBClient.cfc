@@ -311,32 +311,42 @@ component
 	}
 
 
+	/**
+	* @displayname Get Item
+	* @hint Retrieves a single record, identified by it's primary key, from the specified table.  Customized return fields are supported.
+	*/
 	public any function getItem(
 		required string tableName hint="Name of the table from which we are getting an item"
 		, required Any hashKey hint="The numeric or string key identifier for the record you would like retrieved"
 		, Any rangeKey hint="Optional, if defined it will be used in conjunction with the hashKey to identify the record that is to be retrieved"
-		, required string fields)
+		, String attributeNames hint="Optional comma separated list of attribute names. If attribute names are not specified then all attributes will be returned. If some attributes are not found, they will not appear in the result.")
 	{
 		// Set up a protected, sanitized version of the arguments scope
 		var pargs = {};
 		pargs["tableName"] = trim(arguments.tableName);
 		pargs["hashKey"] = trim(arguments.hashKey);
 		if (structKeyExists(arguments, "rangeKey")) pargs["rangeKey"] = trim(arguments.rangeKey);
+		if (structKeyExists(arguments, "attributeNames")) pargs["attributeNames"] = arguments.attributeNames;
 
 		// Initialize the key object that identifies the key, in term the AWS SDK understands
-		var key = createObject("java", "com.amazonaws.services.dynamodb.model.Key")
+		var awsKey = createObject("java", "com.amazonaws.services.dynamodb.model.Key")
 			.init()
 			.withHashKeyElement(createAttributeValue(pargs.hashKey));
 		// If we have a rangeKey specified, add that to our key instance
 		if (structKeyExists(pargs, "rangeKey"))
 		{
-			key.setRangeKeyElement(createAttributeValue(pargs.rangeKey));
+			awsKey.setRangeKeyElement(createAttributeValue(pargs.rangeKey));
 		}
 
-		var get_item_request = createObject("java", "com.amazonaws.services.dynamodb.model.GetItemRequest").init()
+		var awsGetItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.GetItemRequest").init()
 			.withTableName(pargs.tableName)
-			.withKey(key);
-		var result = variables.awsDynamoDBClient.getItem(get_item_request);
+			.withKey(awsKey);
+		// If attribute names were specified for the return, set those in the get item request
+		if (structKeyExists(pargs, "attributeNames") && listLen(pargs["attributeNames"]) > 0)
+		{
+			awsGetItemRequest.setAttributesToGet(listToArray(pargs["attributeNames"]));
+		}
+		var result = variables.awsDynamoDBClient.getItem(awsGetItemRequest);
 		var item = result.getItem();
 
 		// If the requested item was not found, our item var will now be null
@@ -345,7 +355,7 @@ component
 			throw(type="API.AWS.DynamoDB.RecordNotFound", message="The record you're looking for with identifier '#pargs.hashKey#' cannot be found.");
 		}
 		// Return the item, converted into a native CFML struct
-		return dynamo_to_struct_map(result.getItem());
+		return dynamo_to_struct_map(item);
 	}
 
 

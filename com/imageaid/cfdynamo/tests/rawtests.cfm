@@ -85,10 +85,10 @@
 	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- GET ITEM --
-	// itemId = "crackerbarrel";
-	// writeOutput("Getting item with id #itemId# from the table #sTableName#...<br/>");
-	// writeDump(ddbc.getItem(table_name=sTableName, itemKey=itemId, fields="id,Name,payload,car,recentPrices,features,year,binSingle"));
-	// writeOutput("SUCCESS<br/><br/>");
+	itemId = 1004;
+	writeOutput("Getting item with id #itemId# from the table #sTableName#...<br/>");
+	writeDump(ddbc.getItem(tableName=sTableName, hashKey=itemId, attributeNames="id,Name,payload"));
+	writeOutput("SUCCESS<br/><br/>");
 
 	// -- DELETE ITEM --
 	// if (!isDefined("itemId")) itemId = "crackerbarrel";
