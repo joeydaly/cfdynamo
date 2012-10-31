@@ -1,69 +1,118 @@
+/**
+* @accessors true
+* @displayname CFML Amazon AWS DynamoDB Client
+* @hint I handle interactions with an Amazon SDK DynamoDB instance.  To use me, you must have the Amazon SDK jar file in the classpath.
+*/
 component
+
 	accessors="true"
-	displayname="DynamoDB Client"
-	hint="I handle interactions with an Amazon SDK DynamoDB instance.  To use me, you must have the Amazon SDK jar file in the classpath."
+	output="false"
+
 {
+
 	
-	property name="aws_key" type="string" hint="The AWS Key";
-	property name="aws_secret" type="string" hint="The AWS Secret";
-	property name="aws_creds" type="object";
-	property name="aws_dynamodb" type="object";
+	property name="awsKey" type="string" hint="The AWS Key";
+	property name="awsSecret" type="string" hint="The AWS Secret";
+	property name="awsCredentials" type="object";
+	property name="awsDynamoDBClient" type="object";
 	
-	variables.aws_key = "";
-	variables.aws_secret = "";
+	variables.awsKey = "";
+	variables.awsSecret = "";
 
 
+	/**
+	* @displayname Initialize
+	* @hint Returns an initialized instance of this class.  It is intended to be instantiated and used most optimally as a singleton.
+	*/
 	public DynamoDBClient function init(
-			required string aws_key
-			, required string aws_secret
-			, boolean use_https=false
-			, string aws_zone="us-east-1")
+			required string awsKey
+			, required string awsSecret
+			, boolean useHTTPS=false
+			, string awsZone="us-east-1")
 	{
-		variables.aws_key = trim(arguments.aws_key);
-		variables.aws_secret = trim(arguments.aws_secret);
-		variables.aws_creds = createObject("java","com.amazonaws.auth.BasicAWSCredentials").init(variables.aws_key, variables.aws_secret);
-		variables.aws_dynamodb = createObject("java","com.amazonaws.services.dynamodb.AmazonDynamoDBClient").init(aws_creds);
-		if (arguments.use_https)
+		variables.awsKey = trim(arguments.awsKey);
+		variables.awsSecret = trim(arguments.awsSecret);
+		variables.awsCredentials = createObject("java","com.amazonaws.auth.BasicAWSCredentials").init(variables.awsKey, variables.awsSecret);
+		variables.awsDynamoDBClient = createObject("java","com.amazonaws.services.dynamodb.AmazonDynamoDBClient").init(awsCredentials);
+		if (arguments.useHTTPS)
 		{
-			variables.aws_dynamodb.setEndpoint("http://dynamodb.#trim(arguments.aws_zone)#.amazonaws.com");
+			variables.awsDynamoDBClient.setEndpoint("http://dynamodb.#trim(arguments.awsZone)#.amazonaws.com");
 		}
 		return this;
 	}
 	
 
+	/**
+	* @displayname Create Table
+	* @hint Creates a new DynamoDB table.
+	*/
 	public Void function createTable(
-		required string table_name
-		, required string pk_name='id'
-		, required string pk_type = 'hash'
-		, required string pk_value_type='int'
-		, string pk_range_name
-		, string pk_range_value_type
-		, numeric read_capacity=5
-		, numeric write_capacity=5)
+		required String tableName hint="Name of the table to be created"
+		, required String hashKeyName="id" hint="Name of the field in the table that will function as the primary key"
+		, required String hashKeyType="numeric"
+		, String rangeKeyName
+		, String rangeKeyType="string"
+		, Numeric readCapacity=5
+		, Numeric writeCapacity=5)
 	{
-		var read_capacity_casted = JavaCast("long",arguments.read_capacity);
-		var write_capacity_casted = JavaCast("long",arguments.write_capacity);
-		var primary_key_type = ( lcase(trim(arguments.pk_value_type)) == 'int' ? "N" : "S" );
-		var hash_key = createObject(
-			"java",
-			"com.amazonaws.services.dynamodb.model.KeySchemaElement"
-			).init().withAttributeName("#arguments.pk_name#").withAttributeType("#primary_key_type#");
-		var key_schema = createObject("java","com.amazonaws.services.dynamodb.model.KeySchema").init(hash_key);
-        var provisioned_throughput = createObject("java","com.amazonaws.services.dynamodb.model.ProvisionedThroughput").init()
-            .withReadCapacityUnits(#read_capacity_casted#)
-            .withWriteCapacityUnits(#write_capacity_casted#);
-        var table_request = createObject(
-        	"java",
-        	"com.amazonaws.services.dynamodb.model.CreateTableRequest"
-        	).init().withTableName(trim(arguments.table_name)).withKeySchema(key_schema).withProvisionedThroughput(provisioned_throughput);
+		// Create a validated and sanitized copy of the arguments scope to be used in this function
+		var pargs = {};
+		pargs["tableName"] = trim(arguments.tableName);
+		pargs["hashKeyName"] = trim(arguments.hashKeyName);
+		pargs["hashKeyType"] = trim(arguments.hashKeyType);
+		pargs["readCapacity"] = arguments.readCapacity;
+		pargs["writeCapacity"] = arguments.writeCapacity;
+		// These next two might not even be defined
+		if (structKeyExists(arguments, "rangeKeyName")) pargs["rangeKeyName"] = trim(arguments.rangeKeyName);
+		if (structKeyExists(arguments, "rangeKeyType")) pargs["rangeKeyType"] = trim(arguments.rangeKeyType);
+
+		// Start setting up the creation parameters
+		var readCapacityCasted = JavaCast("long",pargs.readCapacity);
+		var writeCapacityCasted = JavaCast("long",pargs.writeCapacity);
+		var awsHashKeyType = ( lcase(pargs.hashKeyType) == 'numeric' ? "N" : "S" );
+		var awsHashKey = createObject("java", "com.amazonaws.services.dynamodb.model.KeySchemaElement")
+			.init()
+			.withAttributeName(pargs.hashKeyName)
+			.withAttributeType(awsHashKeyType);
+
+		// Create the KeySchema, which feeds into our CreateTableRequest
+		var awsKeySchema = createObject("java","com.amazonaws.services.dynamodb.model.KeySchema")
+			.init()
+			.withHashKeyElement(awsHashKey);
+
+		// If a range key was provided in the parameters, define one
+		if (structKeyExists(pargs, "rangeKeyName") && structKeyExists(pargs, "rangeKeyType"))
+		{
+			// Determine the type
+			var awsRangeKeyType = ( lcase(pargs.rangeKeyType) == 'numeric' ? "N" : "S" );
+			// Create our range representational key schema element
+			var awsRangeKey = createObject("java", "com.amazonaws.services.dynamodb.model.KeySchemaElement")
+				.init()
+				.withAttributeName(pargs.rangeKeyName)
+				.withAttributeType(awsRangeKeyType);
+			// Assign it to the KeySchema we made already
+			awsKeySchema.setRangeKeyElement(awsRangeKey);
+		}
+
+		// Define the provisioned throughput based on provided parameters
+        var awsProvisionedThroughput = createObject("java","com.amazonaws.services.dynamodb.model.ProvisionedThroughput")
+			.init()
+			.withReadCapacityUnits(readCapacityCasted)
+			.withWriteCapacityUnits(writeCapacityCasted);
+
+		// Finally, make the create table request, using all the things we've built up so far        
+        var awsTableRequest = createObject("java","com.amazonaws.services.dynamodb.model.CreateTableRequest")
+        	.init()
+        	.withTableName(pargs.tableName)
+        	.withKeySchema(awsKeySchema)
+        	.withProvisionedThroughput(awsProvisionedThroughput);
         
-        try
-        {
-        	variables.aws_dynamodb.createTable(table_request);
+        // Perform the request in a try purely to give us a way to log it.  We love log files!
+        try {
+        	variables.awsDynamoDBClient.createTable(awsTableRequest);
         }
-        catch(Any e)
-        {
-        	writeLog(type="Error",text="#e.type# :: #e.message#", file="dynamodb.log");
+        catch(Any e) {
+        	writeLog(type="Error",text="#e.type# :: #e.message#", file="dynamodb");
         	rethrow;
         }
 		return;
@@ -72,23 +121,23 @@ component
 
 	public boolean function updateTable(
 		required string table_name
-		, required numeric read_capacity
-		, required numeric write_capacity)
+		, required numeric readCapacity
+		, required numeric writeCapacity)
 	{
 		var result = true;
 		var call_result = "";
-		var read_capacity_casted = JavaCast("long",arguments.read_capacity);
-		var write_capacity_casted = JavaCast("long",arguments.write_capacity);
+		var readCapacityCasted = JavaCast("long",arguments.readCapacity);
+		var writeCapacityCasted = JavaCast("long",arguments.writeCapacity);
 		var provisioned_throughput = createObject("java","com.amazonaws.services.dynamodb.model.ProvisionedThroughput").init()
-            .withReadCapacityUnits(#read_capacity_casted#)
-            .withWriteCapacityUnits(#write_capacity_casted#);
+            .withReadCapacityUnits(#readCapacityCasted#)
+            .withWriteCapacityUnits(#writeCapacityCasted#);
 		var update_table_request = createObject(
 			"java", 
 			"com.amazonaws.services.dynamodb.model.UpdateTableRequest"
 			).init().withTableName(trim(arguments.table_name)).withProvisionedThroughput(provisioned_throughput);
         
         try{
-        	call_result = variables.aws_dynamodb.updateTable(update_table_request);
+        	call_result = variables.awsDynamoDBClient.updateTable(update_table_request);
         }
         catch(Any e){
         	result = false;
@@ -104,7 +153,7 @@ component
 		var result = true;
 		var delete_table_request = createObject("java","com.amazonaws.services.dynamodb.model.DeleteTableRequest").init().withTableName(trim(arguments.table_name));
         try{
-        	variables.aws_dynamodb.deleteTable(delete_table_request);
+        	variables.awsDynamoDBClient.deleteTable(delete_table_request);
         }
         catch(Any e){
         	writeLog(type="Error",text="#e.type# :: #e.message#", file="dynamodb");
@@ -126,7 +175,7 @@ component
 		{
 			table_request.setExclusiveStartTableName(trim(arguments.start_table));
 		}
-		return variables.aws_dynamodb.listTables(table_request).getTableNames();
+		return variables.awsDynamoDBClient.listTables(table_request).getTableNames();
 	}
 	
 
@@ -137,7 +186,7 @@ component
 		var put_item_request = createObject("java", "com.amazonaws.services.dynamodb.model.PutItemRequest").init();
 		put_item_request.setTableName(trim(arguments.table_name));
 		put_item_request.setItem(struct_to_dynamo_map(arguments.item));
-		var put_response = variables.aws_dynamodb.putItem(put_item_request);
+		var put_response = variables.awsDynamoDBClient.putItem(put_item_request);
 		return put_response;
 	}
 
@@ -181,7 +230,7 @@ component
 		batchWriteItemRequest.setRequestItems(requestItems);
 		do {
 			// batchWriteItemRequest.setRequestItems(aWriteRequestBatch);
-			result = variables.aws_dynamodb.batchWriteItem(batchWriteItemRequest);
+			result = variables.awsDynamoDBClient.batchWriteItem(batchWriteItemRequest);
 		} while (result.getUnprocessedItems().size() > 0);
 		// Nothing to return
 		return;
@@ -213,7 +262,7 @@ component
 		var get_item_request = createObject("java", "com.amazonaws.services.dynamodb.model.GetItemRequest").init()
 			.withTableName(pargs.tableName)
 			.withKey(key);
-		var result = variables.aws_dynamodb.getItem(get_item_request);
+		var result = variables.awsDynamoDBClient.getItem(get_item_request);
 		var item = result.getItem();
 
 		// If the requested item was not found, our item var will now be null
@@ -258,7 +307,7 @@ component
 			.withKey(key)
 			.withReturnValues(returnValues);
 		// Send the request in!
-		var result = variables.aws_dynamodb.deleteItem(deleteItemRequest);
+		var result = variables.awsDynamoDBClient.deleteItem(deleteItemRequest);
 		// VALIDATION - if the getAttributes() method on the result returns null, then the items that was supposed to
 		// be deleted didn't exist.  This doesn't really hurt anything, but it means this method wasn't able to complete
 		// the request, so we need to throw an exception to be good programmers.
@@ -315,7 +364,7 @@ component
 			arrayAppend(requestItems[pargs.tableName], oWriteRequest);
 		}
 
-		// Create the instance of the batch write request, which is the final package that is sent into the aws_dynamodb Client
+		// Create the instance of the batch write request, which is the final package that is sent into the awsDynamoDBClient Client
 		batchWriteItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.BatchWriteItemRequest").init();
 
 		do {
@@ -323,7 +372,7 @@ component
 			// of the while loop to be the remaining unprocessed items in the batch.
 			batchWriteItemRequest.setRequestItems(requestItems);
 			// Send in the request
-			result = variables.aws_dynamodb.batchWriteItem(batchWriteItemRequest);
+			result = variables.awsDynamoDBClient.batchWriteItem(batchWriteItemRequest);
 			// Assign the remaining items that didn't get processed in this iteration of the loop
 			// to the requestItems var that feeds back into the loop at the top.
 			requestItems = result.getUnprocessedItems();
@@ -367,7 +416,7 @@ component
 			queryRequest.setRangeKeyCondition(condition);
 		}
 
-		var result = variables.aws_dynamodb.query(queryRequest);
+		var result = variables.awsDynamoDBClient.query(queryRequest);
 
 		return dynamoItemCollectionToStructCollection(result.getItems());
 	}
@@ -421,7 +470,7 @@ component
 			scanRequest.setLimit(arguments.limit);
 		}
 		// Execute the scan
-		var result = variables.aws_dynamodb.scan(scanRequest);
+		var result = variables.awsDynamoDBClient.scan(scanRequest);
 		// Return the transformed results in a CFML native format
 		return dynamoItemCollectionToStructCollection(result.getItems());
 	}
