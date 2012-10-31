@@ -414,8 +414,6 @@ component
 
 
 	/**
-	* @author Adam Bellas
-	* @output false
 	* @displayname Batch Delete Items
 	* @hint Utilizes the batch delete capabilities of the AWS Java SDK.  All that's required to complete this operation is the name of the table and a list of keys.  Note that DynamoDB keys can be either a single string or numeric HashKey, or that in addition to a RangeKey.  This is why the items array parameter must contain structs that are made up of either a single 'hashKey' name/val, or both a 'hashKey' and a 'rangeKey' name/val pair.
 	*/
@@ -443,25 +441,25 @@ component
 		for (var item in pargs.items)
 		{
 			// Create the WriteRequest
-			var oWriteRequest = createObject("java", "com.amazonaws.services.dynamodb.model.WriteRequest")
+			var awsWriteRequest = createObject("java", "com.amazonaws.services.dynamodb.model.WriteRequest")
 				.init()
 				.withDeleteRequest(createObject("java", "com.amazonaws.services.dynamodb.model.DeleteRequest")
 					.init()
 					.withKey(createKey(argumentcollection=item))
 				);
 			// Now append it to our batch array
-			arrayAppend(requestItems[pargs.tableName], oWriteRequest);
+			arrayAppend(requestItems[pargs.tableName], awsWriteRequest);
 		}
 
 		// Create the instance of the batch write request, which is the final package that is sent into the awsDynamoDBClient Client
-		batchWriteItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.BatchWriteItemRequest").init();
+		awsBatchWriteItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.BatchWriteItemRequest").init();
 
 		do {
 			// Assign the requestItems to the batch request here because we alter it at the bottom
 			// of the while loop to be the remaining unprocessed items in the batch.
-			batchWriteItemRequest.setRequestItems(requestItems);
+			awsBatchWriteItemRequest.setRequestItems(requestItems);
 			// Send in the request
-			result = variables.awsDynamoDBClient.batchWriteItem(batchWriteItemRequest);
+			result = variables.awsDynamoDBClient.batchWriteItem(awsBatchWriteItemRequest);
 			// Assign the remaining items that didn't get processed in this iteration of the loop
 			// to the requestItems var that feeds back into the loop at the top.
 			requestItems = result.getUnprocessedItems();
