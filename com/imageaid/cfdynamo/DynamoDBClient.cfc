@@ -330,9 +330,8 @@ component
 		if (structKeyExists(arguments, "attributeNames")) pargs["attributeNames"] = arguments.attributeNames;
 
 		// Initialize the key object that identifies the key, in term the AWS SDK understands
-		var awsKey = createObject("java", "com.amazonaws.services.dynamodb.model.Key")
-			.init()
-			.withHashKeyElement(createAttributeValue(pargs.hashKey));
+		var awsKey = createKey(pargs["hashKey"]);
+
 		// If we have a rangeKey specified, add that to our key instance
 		if (structKeyExists(pargs, "rangeKey"))
 		{
@@ -376,9 +375,8 @@ component
 		if (structKeyExists(arguments, "rangeKey")) pargs["rangeKey"] = trim(arguments.rangeKey);
 
 		// Initialize the key object that identifies the key, in term the AWS SDK understands
-		var awsKey = createObject("java", "com.amazonaws.services.dynamodb.model.Key")
-			.init()
-			.withHashKeyElement(createAttributeValue(pargs.hashKey));
+		var awsKey = createKey(pargs["hashKey"]);
+
 		// If we have a rangeKey specified, add that to our key instance
 		if (structKeyExists(pargs, "rangeKey"))
 		{
@@ -558,9 +556,7 @@ component
 		// Check for a starting record for pagination
 		if (structKeyExists(pargs, "startKey"))
 		{
-			var awsKey = createObject("java", "com.amazonaws.services.dynamodb.model.Key")
-				.init()
-				.withHashKeyElement(createAttributeValue(pargs.startKey["hashKey"]));
+			var awsKey = createKey(pargs.startKey["hashKey"]);
 			// Check to see if a range key was provided
 			if (structKeyExists(pargs.startKey, "rangeKey"))
 			{
@@ -748,23 +744,23 @@ component
 	{
 		// We need to detect whether or not a string or numeric key has been passed in so we can properly
 		// detect the kind of AttributeValue to create.
-		var oAttributeValue = createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init();
+		var awsAttributeValue = createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init();
 		if (isNumeric(arguments.itemValue)) {
 			// Set the N value
-			oAttributeValue.setN(arguments.itemValue);
+			awsAttributeValue.setN(arguments.itemValue);
 		}
 		else {
 			// Set the S value, assuming non-numeric values to be strings
 			// TODO: Apply further validation on arguments.itemValue to ensure it's either string or numeric. We shouldn't allow someone to shove an array or something in there and muck up the works.
-			if (isDate(arguments.itemValue)) oAttributeValue.setS(
+			if (isDate(arguments.itemValue)) awsAttributeValue.setS(
 				dateFormat(arguments.itemValue, "yyyy-mm-dd")
 				& 'T'
 				& timeFormat(arguments.itemValue, "HH:mm:ss.SSS")
 				& 'Z'
 			);
-			else oAttributeValue.setS(arguments.itemValue);
+			else awsAttributeValue.setS(arguments.itemValue);
 		}
-		return oAttributeValue;
+		return awsAttributeValue;
 	}
 
 
@@ -796,10 +792,10 @@ component
 			return false;
 		}
 		// Instantiate the enumerator for comparison operators
-		var comparisonOperatorEnum = createObject("java", "com.amazonaws.services.dynamodb.model.ComparisonOperator");
+		var awsComparisonOperator = createObject("java", "com.amazonaws.services.dynamodb.model.ComparisonOperator");
 		// Check the provided operator against the enumerator
 		var bFound = false;
-		for (var op in comparisonOperatorEnum.values())
+		for (var op in awsComparisonOperator.values())
 		{
 			if (op.toString() == aArgs.comparisonOperator)
 			{
@@ -833,17 +829,17 @@ component
 		if (structKeyExists(arguments, "rangeKey")) pargs["rangeKey"] = trim(arguments.rangeKey);
 
 		// Initialize the key object that identifies the key, in term the AWS SDK understands
-		var key = createObject("java", "com.amazonaws.services.dynamodb.model.Key")
+		var awsKey = createObject("java", "com.amazonaws.services.dynamodb.model.Key")
 			.init()
 			.withHashKeyElement(createAttributeValue(pargs.hashKey));
 		// If we have a rangeKey specified, add that to our key instance
 		if (structKeyExists(pargs, "rangeKey"))
 		{
-			key.setRangeKeyElement(createAttributeValue(pargs.rangeKey));
+			awsKey.setRangeKeyElement(createAttributeValue(pargs.rangeKey));
 		}
 
 		// Return the AWS SDK key instance
-		return key;
+		return awsKey;
 	}
 
 
