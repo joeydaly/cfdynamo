@@ -337,7 +337,7 @@ component
 		{
 			awsKey.setRangeKeyElement(createAttributeValue(pargs.rangeKey));
 		}
-
+		// Create our get item request that will be sent to the AWS services
 		var awsGetItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.GetItemRequest").init()
 			.withTableName(pargs.tableName)
 			.withKey(awsKey);
@@ -359,8 +359,12 @@ component
 	}
 
 
+	/**
+	* @displayname Delete Item
+	* @hint Deletes the item, specified by a primary key and optionally a range key, from the specified table. Returns a copy of the item that was deleted so that undo may be implemented in the supporting application.
+	*/
 	public any function deleteItem(
-		required string tableName hint="Name of the table from which a record is to be deleted."
+		required String tableName hint="Name of the table from which a record is to be deleted."
 		, required Any hashKey hint="Numeric or string key that identifies the record to be deleted"
 		, Any rangeKey hint="Optional, if defined it will be used in conjunction with the hashKey to identify the record that is to be retrieved")
 	{
@@ -371,13 +375,13 @@ component
 		if (structKeyExists(arguments, "rangeKey")) pargs["rangeKey"] = trim(arguments.rangeKey);
 
 		// Initialize the key object that identifies the key, in term the AWS SDK understands
-		var key = createObject("java", "com.amazonaws.services.dynamodb.model.Key")
+		var awsKey = createObject("java", "com.amazonaws.services.dynamodb.model.Key")
 			.init()
 			.withHashKeyElement(createAttributeValue(pargs.hashKey));
 		// If we have a rangeKey specified, add that to our key instance
 		if (structKeyExists(pargs, "rangeKey"))
 		{
-			key.setRangeKeyElement(createAttributeValue(pargs.rangeKey));
+			awsKey.setRangeKeyElement(createAttributeValue(pargs.rangeKey));
 		}
 		// Let's setup the returnValues param to the delete request, which will instruct the request to return all the
 		// attributes of the record as it existed prior to the delete.  This sets up the ability to make an UNDO, assuming
@@ -385,24 +389,25 @@ component
 		// result.getAttributes() method after the delete operation completes.
 		var returnValues = createObject("java", "com.amazonaws.services.dynamodb.model.ReturnValue").ALL_OLD;
 		// Now create the delete request
-		var deleteItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.DeleteItemRequest")
+		var awsDeleteItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.DeleteItemRequest")
 			.init()
-			.withTableName(trim(pargs.tableName))
-			.withKey(key)
+			.withTableName(pargs.tableName)
+			.withKey(awsKey)
 			.withReturnValues(returnValues);
 		// Send the request in!
-		var result = variables.awsDynamoDBClient.deleteItem(deleteItemRequest);
+		var result = variables.awsDynamoDBClient.deleteItem(awsDeleteItemRequest);
 		// VALIDATION - if the getAttributes() method on the result returns null, then the items that was supposed to
 		// be deleted didn't exist.  This doesn't really hurt anything, but it means this method wasn't able to complete
 		// the request, so we need to throw an exception to be good programmers.
 		var itemDeleted = result.getAttributes();
-		if (isDefined("itemDeleted"))
+		// Make sure we have a deleted item that returned
+		if (!isDefined("itemDeleted"))
 		{
-			// Convert the hashmap of AttributeValue instances into a CF struct for return
-			var stItemDeleted = dynamo_to_struct_map(result.getAttributes());
+			// There's nothing there, so what we tried to delete was never found.  Throw an exception.
+			throw(type="API.AWS.DynamoDB.RecordNotFound", message="The record you tried to delete with identifier #pargs.hashKey# cannot be found, and was not deleted.");
 		}
-		else throw(type="API.AWS.DynamoDB.RecordNotFound", message="The record you tried to delete with identifier #pargs.hashKey# cannot be found, and was not deleted.");
-
+		// Convert the hashmap of AttributeValue instances into a CF struct for return
+		var stItemDeleted = dynamo_to_struct_map(result.getAttributes());
 		// Return the item that was deleted, since the AWS SDK sends it back to us
 		return stItemDeleted;
 	}
@@ -735,7 +740,12 @@ component
 		else {
 			// Set the S value, assuming non-numeric values to be strings
 			// TODO: Apply further validation on arguments.itemValue to ensure it's either string or numeric. We shouldn't allow someone to shove an array or something in there and muck up the works.
-			if (isDate(arguments.itemValue)) oAttributeValue.setS(dateFormat(arguments.itemValue, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+			if (isDate(arguments.itemValue)) oAttributeValue.setS(
+				dateFormat(arguments.itemValue, "yyyy-mm-dd")
+				& 'T'
+				& timeFormat(arguments.itemValue, "HH:mm:ss.SSS")
+				& 'Z'
+			);
 			else oAttributeValue.setS(arguments.itemValue);
 		}
 		return oAttributeValue;

@@ -12,12 +12,11 @@
 
 
 	// -- CHOOSE A TABLE BY UNCOMMENTING ONE --
-	sTableName = "cfdynamotabletest";
+	// sTableName = "cfdynamotabletest";
 	// sTableName = "temptest01";
 	// sTableName = "Forum";
 	// sTableName = "ProductCatalog";
-	// sTableName = "Reply";
-	// sTableName = "Reply";
+	sTableName = "Reply";
 
 	// -- CREATE TABLE --
 	// writeOutput("creating table #sTableName#...<br/>");
@@ -85,16 +84,25 @@
 	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- GET ITEM --
-	itemId = 1004;
+	itemId = "Adam Test 01";
+	stArgs = {};
+	stArgs["tableName"] = sTableName;
+	stArgs["hashKey"] = itemId;
+	stArgs["rangeKey"] = createDateTime(2012, 12, 22, 0, 0, 0);
+	stArgs["attributeNames"] = "Id,ReplyDateTime,Message";
 	writeOutput("Getting item with id #itemId# from the table #sTableName#...<br/>");
-	writeDump(ddbc.getItem(tableName=sTableName, hashKey=itemId, attributeNames="id,Name,payload"));
+	writeDump(ddbc.getItem(argumentcollection=stArgs));
 	writeOutput("SUCCESS<br/><br/>");
-
+abort;
 	// -- DELETE ITEM --
-	// if (!isDefined("itemId")) itemId = "crackerbarrel";
-	// writeOutput("Deleting item with id #itemId# from table #sTableName#...<br/>");
-	// writeDump(ddbc.deleteItem(table_name=sTableName, itemKey=itemId));
-	// writeOutput("SUCCESS<br/><br/>");
+	itemId = "Adam Test 01";
+	stArgs = {};
+	stArgs["tableName"] = sTableName;
+	stArgs["hashKey"] = itemId;
+	stArgs["rangeKey"] = "2012-12-22T00:00:00.000Z";
+	writeOutput("Deleting item with id #itemId# from table #sTableName#...<br/>");
+	writeDump(ddbc.deleteItem(argumentcollection=stArgs));
+	writeOutput("SUCCESS<br/><br/>");
 
 	// -- QUERY --
 	// writeOutput("Querying table #sTableName#...");
