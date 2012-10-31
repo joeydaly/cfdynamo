@@ -15,8 +15,8 @@
 	// sTableName = "cfdynamotabletest";
 	// sTableName = "temptest01";
 	// sTableName = "Forum";
-	// sTableName = "ProductCatalog";
-	sTableName = "Reply";
+	sTableName = "ProductCatalog";
+	// sTableName = "Reply";
 
 	// -- CREATE TABLE --
 	// writeOutput("creating table #sTableName#...<br/>");
@@ -58,12 +58,12 @@
 
 	// -- BATCH PUT ITEM --
 	// aSampleItems = [
-	// 	{"id":1000, "Name":"gumdrops", "payload":["alpha","beta","delta","gamma"], "likeChocolate":"true","cows":10}
-	// 	, {"id":1001, "Name":"shoemonkey", "payload":["red","orange","yellow","green"], "likeChocolate":"false","cows":0}
-	// 	, {"id":1002, "Name":"rimbot", "payload":["peter","paul","mary","puff"], "likeChocolate":"true","cows":42752659}
-	// 	, {"id":1003, "Name":"pony", "payload":["peter","paul","mary","puff"], "likeChocolate":"true","cows":559}
-	// 	, {"id":1004, "Name":"swiss", "payload":["peter","paul","mary","puff"], "likeChocolate":"false","cows":1337}
-	// 	, {"id":1005, "Name":"Carl", "payload":["peter","paul","mary","puff"], "likeChocolate":"false","cows":27}
+	// 	{"Id":300, "Name":"gumdrops", "payload":["alpha","beta","delta","gamma"], "likeChocolate":"true","cows":10}
+	// 	, {"Id":3001, "Title":"shoemonkey", "Brand":"Pepsi Co.", "likeChocolate":"false","cows":0}
+	// 	, {"Id":302, "Title":"rimbot", "Brand":"Mattel", "likeChocolate":"true","cows":42752659}
+	// 	, {"Id":303, "Title":"pony", "Brand":"Johnson & Johnson", "likeChocolate":"true","cows":559}
+	// 	, {"Id":304, "Title":"swiss", "Brand":"Nestles", "likeChocolate":"false","cows":1337}
+	// 	, {"Id":305, "Title":"Carl", "Brand":"Bughatti", "likeChocolate":"false","cows":27}
 	// ];
 	// writeOutput("Here are #arrayLen(aSampleItems)# sample objects we will create for batch insertion.<br/>");
 	// writeDump(var=aSampleItems, label="Sample Data for insertion", expand=false);
@@ -105,40 +105,39 @@
 	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- QUERY --
-	stArgs = {};
-	stArgs["tableName"] = sTableName;
-	stArgs["hashKey"] = "Amazon DynamoDB##DynamoDB Thread 1";
-	stArgs["comparisonOperator"] = "BETWEEN";
-	stArgs["comparisonValues"] = [createDate(2012, 10, 9), now()];
-	stArgs["startKey"] = {"hashKey":"Amazon DynamoDB##DynamoDB Thread 1", "rangeKey":createDateTime(2012, 10, 11, 19, 6, 21, 564)};
-	writeOutput("Querying table #sTableName#...");
-	writeDump(ddbc.queryTable(argumentcollection=stArgs));
-	writeOutput("SUCCESS<br/><br/>");
+	// stArgs = {};
+	// stArgs["tableName"] = sTableName;
+	// stArgs["hashKey"] = "Amazon DynamoDB##DynamoDB Thread 1";
+	// stArgs["comparisonOperator"] = "BETWEEN";
+	// stArgs["comparisonValues"] = [createDate(2012, 10, 9), now()];
+	// stArgs["startKey"] = {"hashKey":"Amazon DynamoDB##DynamoDB Thread 1", "rangeKey":createDateTime(2012, 10, 11, 19, 6, 21, 564)};
+	// writeOutput("Querying table #sTableName#...");
+	// writeDump(ddbc.queryTable(argumentcollection=stArgs));
+	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- SCAN --
 	// writeOutput("Scanning table #sTableName#...");
 	// condition1 =
 	// 	{
-	// 		"attributeName"="car"
-	// 		, "comparisonOperator"="EQ"
+	// 		"attributeName"="Title"
+	// 		, "comparisonOperator"="BEGINS_WITH"
 	// 		, "comparisonValues"=
-	// 		["Mazda"]
+	// 		["s"]
 	// 	};
 	// condition2 =
 	// 	{
-	// 		"attributeName"="year"
-	// 		, "comparisonOperator"="BETWEEN"
+	// 		"attributeName"="Price"
+	// 		, "comparisonOperator"="GT"
 	// 		, "comparisonValues"=
-	// 		[
-	// 			2000
-	// 			, 2010
-	// 		]
+	// 		[400]
 	// 	};
-	// aConditions = []; // [condition1,condition2];
-	// startKey = {"hashKey"="Amazon DynamoDB##DynamoDB Thread 1", "rangeKey"="2012-10-04T19:03:50.209Z"};
-	// startKey = {"hashKey"="100"};
-	// writeDump(ddbc.scanTable(tableName=sTableName, conditions=aConditions, limit=20, start=startKey));
-	// writeDump(ddbc.scanTable(tableName=sTableName));
+	// aConditions = [condition1,condition2];
+	// stArgs = {};
+	// stArgs["tableName"] = sTableName;
+	// stArgs["conditions"] = aConditions;
+	// stArgs["limit"] = 4;
+	// stArgs["startKey"] = {"hashKey"="100"};
+	// writeDump(ddbc.scanTable(argumentcollection=stArgs));
 	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- DELETE TABLE --

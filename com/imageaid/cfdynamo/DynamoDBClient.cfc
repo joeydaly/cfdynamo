@@ -299,6 +299,7 @@ component
 		}
 		// Setup the request, but don't add any items to it yet.  That's done inside the while loop.
 		awsBatchWriteItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.BatchWriteItemRequest").init();
+
 		do {
 			awsBatchWriteItemRequest.setRequestItems(requestItems);
 			result = variables.awsDynamoDBClient.batchWriteItem(awsBatchWriteItemRequest);
@@ -518,26 +519,33 @@ component
 	}
 
 
+	/**
+	* @displayname Scan Table
+	* @hint Scans (explore/read) the specified table. This is directly pulling in records from the table with filtering.
+	*/
 	public Array function scanTable(
 		required String tableName hint="Name of table to be scanned.  Case sensitive."
 		, Array conditions hint="Optional, a collection of condition structures to be used as condition filters on the resulting scan."
-		, Struct start hint="Exclusive start key set, used for pagination. Must be a struct with a required key 'hashKey' and optional key 'rangeKey'."
+		, Struct startKey hint="Exclusive start key set, used for pagination. Must be a struct with a required key 'hashKey' and optional key 'rangeKey'."
 		, Numeric limit hint="Limit on how many results to return, used for pagination")
 	{
 		// Create private copy of arguments where we sanitize values
 		var pargs = {};
 		pargs.tableName = trim(arguments.tableName);
+		if (structKeyExists(arguments, "conditions")) pargs["conditions"] = arguments.conditions;
+		if (structKeyExists(arguments, "startKey")) pargs["startKey"] = duplicate(arguments.startKey);
+		if (structKeyExists(arguments, "limit")) pargs["limit"] = arguments.limit;
 
 		// Create the scan request
-		var scanRequest = createObject("java", "com.amazonaws.services.dynamodb.model.ScanRequest")
+		var awsScanRequest = createObject("java", "com.amazonaws.services.dynamodb.model.ScanRequest")
 			.init()
 			.withTableName(pargs.tableName);
 	
 		// Examine the arguments scope for valid additional filter parameters
-		if (structKeyExists(arguments, "conditions") && arrayLen(arguments.conditions))
+		if (structKeyExists(pargs, "conditions") && arrayLen(pargs.conditions))
 		{
 			var scanConditions = {};
-			for (var cond in arguments.conditions)
+			for (var cond in pargs.conditions)
 			{
 				var awsCondition = createObject("java", "com.amazonaws.services.dynamodb.model.Condition")
 					.init()
@@ -545,28 +553,29 @@ component
 					.withAttributeValueList(convertArrayToAttributeValues(cond["comparisonValues"]));
 				scanConditions[cond["attributeName"]] = awsCondition;
 			}
-			scanRequest.setScanFilter(scanConditions);
+			awsScanRequest.setScanFilter(scanConditions);
 		}
 		// Check for a starting record for pagination
-		if (structKeyExists(arguments, "start"))
+		if (structKeyExists(pargs, "startKey"))
 		{
-			var startKey = createObject("java", "com.amazonaws.services.dynamodb.model.Key")
+			var awsKey = createObject("java", "com.amazonaws.services.dynamodb.model.Key")
 				.init()
-				.withHashKeyElement(createAttributeValue(arguments.start["hashKey"]));
+				.withHashKeyElement(createAttributeValue(pargs.startKey["hashKey"]));
 			// Check to see if a range key was provided
-			if (structKeyExists(arguments.start, "rangeKey"))
+			if (structKeyExists(pargs.startKey, "rangeKey"))
 			{
-				startKey.setRangeKeyElement(createAttributeValue(arguments.start["rangeKey"]));
+				awsKey.setRangeKeyElement(createAttributeValue(pargs.startKey["rangeKey"]));
 			}
-			scanRequest.setExclusiveStartKey(startKey);
+			awsScanRequest.setExclusiveKey(awsKey);
 		}
 		// Check for a limiter on the size of the result set for paging result sets
-		if (structKeyExists(arguments, "limit"))
+		if (structKeyExists(pargs, "limit"))
 		{
-			scanRequest.setLimit(arguments.limit);
+			awsScanRequest.setLimit(createObject("java", "java.lang.Integer").init(pargs.limit));
 		}
+
 		// Execute the scan
-		var result = variables.awsDynamoDBClient.scan(scanRequest);
+		var result = variables.awsDynamoDBClient.scan(awsScanRequest);
 		// Return the transformed results in a CFML native format
 		return dynamoItemCollectionToStructCollection(result.getItems());
 	}
