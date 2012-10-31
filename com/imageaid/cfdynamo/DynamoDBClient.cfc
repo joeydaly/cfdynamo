@@ -151,30 +151,40 @@ component
 	* @hint Modifies the specified table. The only changes one can make with the AWS SDK is the read and write capacity. This method handles modifying those values.
 	*/
 	public boolean function updateTable(
-		required string table_name
-		, required numeric readCapacity
-		, required numeric writeCapacity)
+		required string tableName hint="Name of the table to be updated"
+		, required numeric readCapacity hint="Number of capacity units per second throughput that is required of the table for read operations"
+		, required numeric writeCapacity hint="Number of capacity units per second throughput that is required of the table for write operations")
 	{
-		var result = true;
-		var call_result = "";
-		var readCapacityCasted = JavaCast("long",arguments.readCapacity);
-		var writeCapacityCasted = JavaCast("long",arguments.writeCapacity);
-		var provisioned_throughput = createObject("java","com.amazonaws.services.dynamodb.model.ProvisionedThroughput").init()
-            .withReadCapacityUnits(#readCapacityCasted#)
-            .withWriteCapacityUnits(#writeCapacityCasted#);
-		var update_table_request = createObject(
-			"java", 
-			"com.amazonaws.services.dynamodb.model.UpdateTableRequest"
-			).init().withTableName(trim(arguments.table_name)).withProvisionedThroughput(provisioned_throughput);
-        
+		// Create a validated and sanitized copy of the arguments scope to be used in this function
+		var pargs = {};
+		pargs["tableName"] = trim(arguments.tableName);
+		pargs["readCapacity"] = arguments.readCapacity;
+		pargs["writeCapacity"] = arguments.writeCapacity;
+
+		// Transform our capacities into Java longs
+		var readCapacityCasted = JavaCast("long", pargs.readCapacity);
+		var writeCapacityCasted = JavaCast("long", pargs.writeCapacity);
+
+		var awsProvisionedThroughput = createObject("java","com.amazonaws.services.dynamodb.model.ProvisionedThroughput")
+			.init()
+            .withReadCapacityUnits(readCapacityCasted)
+            .withWriteCapacityUnits(writeCapacityCasted);
+		var update_table_request = createObject("java", "com.amazonaws.services.dynamodb.model.UpdateTableRequest")
+			.init()
+			.withTableName(pargs.tableName)
+			.withProvisionedThroughput(awsProvisionedThroughput);
+
+		// Make the call to AWS        
         try{
-        	call_result = variables.awsDynamoDBClient.updateTable(update_table_request);
+        	var result = variables.awsDynamoDBClient.updateTable(update_table_request);
         }
         catch(Any e){
-        	result = false;
-        	writeLog(type="Error",text="#e.type# :: #e.message#", file="dynamodb.log");
+        	writeLog(type="Error",text="#e.type# :: #e.message#", file="dynamodb");
+        	rethrow;
         }
-		return result;
+
+        // Always return true since we throw an exception if something went wrong
+		return true;
 	}
 	
 

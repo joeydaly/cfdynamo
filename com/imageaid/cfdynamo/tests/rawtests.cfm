@@ -33,19 +33,21 @@
 	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- UPDATE TABLE --
-	// writeOutput("Updating table, setting the throughput to 10/5.<br/>");
-	// ddbc.updateTable(table_name=sTableName, read_capacity=10, write_capacity=5);
+	// nRC = 8;
+	// nWC = 2;
+	// writeOutput("Updating table, setting the throughput to #nRC#/#nWC#.<br/>");
+	// ddbc.updateTable(tableName=sTableName, readCapacity=nRC, writeCapacity=nWC);
 	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- LIST TABLES --
-	writeOutput("Listing tables...<br/>");
-	writeDump(ddbc.listTables());
-	writeOutput("SUCCESS<br/><br/>");
+	// writeOutput("Listing tables...<br/>");
+	// writeDump(ddbc.listTables());
+	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- TABLE INFO --
-	writeOutput("Getting details for table #sTableName#...<br/>");
-	writeDump(ddbc.getTableInformation(sTableName));
-	writeOutput("SUCCESS<br/><br/>");
+	// writeOutput("Getting details for table #sTableName#...<br/>");
+	// writeDump(ddbc.getTableInformation(sTableName));
+	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- PUT ITEM --
 	// writeOutput("Here's a sample object we will create for insertion.<br/>");
