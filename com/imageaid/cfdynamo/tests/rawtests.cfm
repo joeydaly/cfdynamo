@@ -3,6 +3,11 @@
 
 	// We already have the connector instantiated in the application scope.  Alias it to
 	// the local page scope so we can re-instantiate it in case we feel like it here.
+	credentials = xmlParse(expandPath("/aws_credentials.xml"));
+	application.aws.cfdynamo = new com.imageaid.cfdynamo.DynamoDBClient(
+		awsKey = credentials.cfdynamo.access_key.xmlText, 
+		awsSecret = credentials.cfdynamo.secret_key.xmlText
+	);
 	ddbc = application.aws.cfdynamo;
 
 
@@ -35,6 +40,11 @@
 	// -- LIST TABLES --
 	writeOutput("Listing tables...<br/>");
 	writeDump(ddbc.listTables());
+	writeOutput("SUCCESS<br/><br/>");
+
+	// -- TABLE INFO --
+	writeOutput("Getting details for table #sTableName#...<br/>");
+	writeDump(ddbc.getTableInformation(sTableName));
 	writeOutput("SUCCESS<br/><br/>");
 
 	// -- PUT ITEM --

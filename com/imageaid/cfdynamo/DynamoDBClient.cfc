@@ -117,8 +117,39 @@ component
         }
 		return;
 	}
-	
 
+
+	/**
+	* @displayname Get Table Information
+	* @hint Retrieves detailed information about the specified table.
+	*/
+    public Struct function getTableInformation(
+    	required String tableName hint="Name of the table to get information about.")
+    {
+    	// Private sanitized copy of the arguments scope
+    	var pargs = {"tableName":trim(arguments.tableName)};
+
+        var awsDescribeTableRequest = createObject("java", "com.amazonaws.services.dynamodb.model.DescribeTableRequest")
+        	.init()
+        	.withTableName(pargs["tableName"]);
+        var result = awsDynamoDBClient.describeTable(awsDescribeTableRequest);
+        var awsTableDescription = result.getTable();
+
+        // The result is messy for ColdFusion so let's map it to a basic struct with the properties of the table as keys
+		var stTableInfo = {};
+		stTableInfo["name"] = awsTableDescription.getTableName();
+		stTableInfo["status"] = awsTableDescription.getTableStatus();
+		stTableInfo["read capacity"] = awsTableDescription.getProvisionedThroughput().getReadCapacityUnits();
+		stTableInfo["write capacity"] = awsTableDescription.getProvisionedThroughput().getWriteCapacityUnits();
+		// Return the struct
+		return stTableInfo;
+    }	
+
+
+	/**
+	* @displayname Update Table
+	* @hint Modifies the specified table. The only changes one can make with the AWS SDK is the read and write capacity. This method handles modifying those values.
+	*/
 	public boolean function updateTable(
 		required string table_name
 		, required numeric readCapacity
