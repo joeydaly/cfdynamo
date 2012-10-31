@@ -241,15 +241,25 @@ component
 	}
 	
 
-	public any function putItem(
-		required string table_name hint="Name of the table into which the provided data will be inserted as a record."
+	/**
+	* @displayname Put Item
+	* @hint Adds a record to a specified DynamoDB table.  The entirety of the record is specified by a single simple struct.  Note that DynamoDB only supports structs two levels deep, i.e. you can have a struct of strings as the value for one of you top level struct keys, however you cannot then embed deeper structs within that.
+	*/
+	public Any function putItem(
+		required string tableName hint="Name of the table into which the provided data will be inserted as a record."
 		, required struct item hint="Struct containing the data that is to become the new record in the table.")
 	{
-		var put_item_request = createObject("java", "com.amazonaws.services.dynamodb.model.PutItemRequest").init();
-		put_item_request.setTableName(trim(arguments.table_name));
-		put_item_request.setItem(struct_to_dynamo_map(arguments.item));
-		var put_response = variables.awsDynamoDBClient.putItem(put_item_request);
-		return put_response;
+		// Create a validated and sanitized copy of the arguments scope to be used in this function
+		var pargs = {};
+		pargs["tableName"] = trim(arguments.tableName);
+		pargs["item"] = arguments.item;
+
+		var awsPutItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.PutItemRequest")
+			.init()
+			.withTableName(pargs.tableName)
+			.withItem(struct_to_dynamo_map(pargs.item));
+		var result = variables.awsDynamoDBClient.putItem(awsPutItemRequest);
+		return result;
 	}
 
 

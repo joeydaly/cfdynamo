@@ -13,8 +13,8 @@
 
 	// -- CHOOSE A TABLE BY UNCOMMENTING ONE --
 	// sTableName = "cfdynamotabletest";
-	sTableName = "temptest01";
-	// sTableName = "Forum";
+	// sTableName = "temptest01";
+	sTableName = "Forum";
 	// sTableName = "ProductCatalog";
 	// sTableName = "Reply";
 	// sTableName = "Reply";
@@ -40,9 +40,9 @@
 	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- LIST TABLES --
-	writeOutput("Listing tables...<br/>");
-	writeDump(ddbc.listTables());
-	writeOutput("SUCCESS<br/><br/>");
+	// writeOutput("Listing tables...<br/>");
+	// writeDump(ddbc.listTables());
+	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- TABLE INFO --
 	// writeOutput("Getting details for table #sTableName#...<br/>");
@@ -50,12 +50,12 @@
 	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- PUT ITEM --
-	// writeOutput("Here's a sample object we will create for insertion.<br/>");
-	// oSample = {"Name":"crackerbarrel", "payload":["foo","bar","knee","toes"], "likeChocolate":"false","cows":93};
-	// writeDump(var=oSample, label="Sample Data");
-	// writeOutput("Putting our sample record into the table #sTableName#...<br/>");
-	// writeDump(ddbc.putItem(table_name=sTableName, item=oSample));
-	// writeOutput("SUCCESS<br/><br/>");
+	writeOutput("Here's a sample object we will create for insertion.<br/>");
+	oSample = {"Name":"crackerbarrel", "payload":["foo","bar","knee","toes"], "likeChocolate":"false","cows":93};
+	writeDump(var=oSample, label="Sample Data");
+	writeOutput("Putting our sample record into the table #sTableName#...<br/>");
+	writeDump(ddbc.putItem(tableName=sTableName, item=oSample));
+	writeOutput("SUCCESS<br/><br/>");
 
 	// -- BATCH PUT ITEM --
 	// writeOutput("Here are three sample objects we will create for batch insertion.<br/>");
