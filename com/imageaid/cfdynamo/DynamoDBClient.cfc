@@ -469,24 +469,33 @@ component
 	}
 
 
+	/**
+	* @displayname Query Table
+	* @hint Queries a DynamoDB table specified.  Uses the hashKey or the hashKey and rangeKey criteria. You can query a table only if it has a composite primary key, that is, a primary that is composed of both a hash and range attribute.
+	*/
 	public Array function queryTable(
 		required String tableName hint="Name of the table to be queried.  Case sensitive."
-		, required Any itemKey hint="String or numeric, the value of the hash key to match on the query"
+		, required Any hashKey hint="String or numeric, the value of the hash key to match on the query"
 		, String comparisonOperator hint="Must be one of the accepted comparison operators"
-		, Array comparisonValues hint="Collection of one or two values to be compared. Two are used for operators such as BETWEEN.")
+		, Array comparisonValues hint="Collection of one or two values to be compared. Two are used for operators such as BETWEEN."
+		, Struct startKey hint="Optional. If specified, must include 'hashKey' and 'rangeKey' keys, with specified values for those to match the record in the result set to start the pagination from."
+		, Numeric limit=50 hint="Optional, defaults to 50. Specifies the number of items to be returned.")
 	{
 		// Create private copy of arguments where we sanitize values
 		var pargs = {};
-		pargs.tableName = trim(arguments.tableName);
-		pargs.itemKey = trim(arguments.itemKey);
+		pargs["tableName"] = trim(arguments.tableName);
+		pargs["hashKey"] = trim(arguments.hashKey);
+		if (structKeyExists(arguments, "comparisonOperator")) pargs["comparisonOperator"] = arguments.comparisonOperator;
+		if (structKeyExists(arguments, "comparisonValues")) pargs["comparisonValues"] = arguments.comparisonValues;
+		if (structKeyExists(arguments, "startKey")) pargs["startKey"] = arguments.startKey;
+		pargs["limit"] = arguments.limit;
 
-		// Generate our key instance
-		var key = createAttributeValue(pargs.itemKey);
 		// Create the query request, using initial values for a plain hash key query
-		var queryRequest = createObject("java", "com.amazonaws.services.dynamodb.model.QueryRequest")
+		var awsQueryRequest = createObject("java", "com.amazonaws.services.dynamodb.model.QueryRequest")
 			.init()
-			.withTableName(trim(pargs.tableName))
-			.withHashKeyValue(key);
+			.withTableName(pargs.tableName)
+			.withHashKeyValue(createAttributeValue(pargs.hashKey))
+			.withLimit(pargs["limit"]);
 
 		// Examine private arguments (pargs) to determine if we have a range key condition. Validation is factored
 		// into a private function that does some careful checking to ensure everything is structured properly.
@@ -495,15 +504,15 @@ component
 			pargs.comparisonOperator = UCase(trim(arguments.comparisonOperator));
 			pargs.comparisonValues = convertArrayToAttributeValues(arguments.comparisonValues);
 			// Looks like we have one. Setup a condition that we can add to the query request
-			var condition = createObject("java", "com.amazonaws.services.dynamodb.model.Condition")
+			var awsCondition = createObject("java", "com.amazonaws.services.dynamodb.model.Condition")
 				.init()
 				.withComparisonOperator(pargs.comparisonOperator)
 				.withAttributeValueList(pargs.comparisonValues);
 			// Add the condition to the query request
-			queryRequest.setRangeKeyCondition(condition);
+			awsQueryRequest.setRangeKeyCondition(awsCondition);
 		}
 
-		var result = variables.awsDynamoDBClient.query(queryRequest);
+		var result = variables.awsDynamoDBClient.query(awsQueryRequest);
 
 		return dynamoItemCollectionToStructCollection(result.getItems());
 	}

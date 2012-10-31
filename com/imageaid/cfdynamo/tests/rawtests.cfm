@@ -84,30 +84,36 @@
 	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- GET ITEM --
-	itemId = "Adam Test 01";
-	stArgs = {};
-	stArgs["tableName"] = sTableName;
-	stArgs["hashKey"] = itemId;
-	stArgs["rangeKey"] = createDateTime(2012, 12, 22, 0, 0, 0);
-	stArgs["attributeNames"] = "Id,ReplyDateTime,Message";
-	writeOutput("Getting item with id #itemId# from the table #sTableName#...<br/>");
-	writeDump(ddbc.getItem(argumentcollection=stArgs));
-	writeOutput("SUCCESS<br/><br/>");
-abort;
+	// itemId = "Adam Test 01";
+	// stArgs = {};
+	// stArgs["tableName"] = sTableName;
+	// stArgs["hashKey"] = itemId;
+	// stArgs["rangeKey"] = createDateTime(2012, 12, 22, 0, 0, 0);
+	// stArgs["attributeNames"] = "Id,ReplyDateTime,Message";
+	// writeOutput("Getting item with id #itemId# from the table #sTableName#...<br/>");
+	// writeDump(ddbc.getItem(argumentcollection=stArgs));
+	// writeOutput("SUCCESS<br/><br/>");
+
 	// -- DELETE ITEM --
-	itemId = "Adam Test 01";
-	stArgs = {};
-	stArgs["tableName"] = sTableName;
-	stArgs["hashKey"] = itemId;
-	stArgs["rangeKey"] = "2012-12-22T00:00:00.000Z";
-	writeOutput("Deleting item with id #itemId# from table #sTableName#...<br/>");
-	writeDump(ddbc.deleteItem(argumentcollection=stArgs));
-	writeOutput("SUCCESS<br/><br/>");
+	// itemId = "Adam Test 01";
+	// stArgs = {};
+	// stArgs["tableName"] = sTableName;
+	// stArgs["hashKey"] = itemId;
+	// stArgs["rangeKey"] = "2012-12-22T00:00:00.000Z";
+	// writeOutput("Deleting item with id #itemId# from table #sTableName#...<br/>");
+	// writeDump(ddbc.deleteItem(argumentcollection=stArgs));
+	// writeOutput("SUCCESS<br/><br/>");
 
 	// -- QUERY --
-	// writeOutput("Querying table #sTableName#...");
-	// writeDump(ddbc.queryTable(tableName=sTableName, itemKey="Amazon DynamoDB##DynamoDB Thread 1", comparisonOperator="BETWEEN", comparisonValues=[createDate(2012, 10, 9), now()]));
-	// writeOutput("SUCCESS<br/><br/>");
+	stArgs = {};
+	stArgs["tableName"] = sTableName;
+	stArgs["hashKey"] = "Amazon DynamoDB##DynamoDB Thread 1";
+	stArgs["comparisonOperator"] = "BETWEEN";
+	stArgs["comparisonValues"] = [createDate(2012, 10, 9), now()];
+	stArgs["startKey"] = {"hashKey":"Amazon DynamoDB##DynamoDB Thread 1", "rangeKey":createDateTime(2012, 10, 11, 19, 6, 21, 564)};
+	writeOutput("Querying table #sTableName#...");
+	writeDump(ddbc.queryTable(argumentcollection=stArgs));
+	writeOutput("SUCCESS<br/><br/>");
 
 	// -- SCAN --
 	// writeOutput("Scanning table #sTableName#...");
