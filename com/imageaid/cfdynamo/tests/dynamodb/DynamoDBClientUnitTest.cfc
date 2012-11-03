@@ -59,11 +59,9 @@ component
 		CUT.setAwsDynamoDBClient(oAWSMock);
 
 		// Order our CUT to perform the operation
-		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
-		writeLog(type="information", file="unittests", text="TEST createTableWithJustUniqueNameShouldCreateTable generated this table: #awsTableDescription.toString()#");
-		assertFalse(isDefined("result"));
+		var stTableInfo = CUT.createTable(argumentcollection=stArgs);
 		// Make sure we found our table in the list of tables
-		assertEquals(stArgs["tableName"], awsTableDescription.getTableName(), "The resulting table description instance should be reporing a table name of '#stArgs.tableName#' but is instead reporting '#awsTableDescription.getTableName()#'.");
+		assertEquals(stArgs["tableName"], stTableInfo["tableName"], "The resulting table description instance should be reporing a table name of '#stArgs.tableName#' but is instead reporting '#stTableInfo.tableName#'.");
 	}
 
 
@@ -105,34 +103,48 @@ component
 		CUT.setAwsDynamoDBClient(oAWSMock);
 
 		// Create our table with custom read/write provisioning that is NOT the default values
-		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
-		writeLog(type="information", file="unittests", text="TEST createTableShouldAssignReadWriteThroughput generated this table: #awsTableDescription.toString()#");
+		var stTableInfo = CUT.createTable(argumentcollection=stArgs);
 		// Assert that our returned values from the serice report true
-		assertEquals(awsTableDescription.getProvisionedThroughput().getReadCapacityUnits(), stArgs["readCapacity"], "The specified read capacity of #stArgs['readCapacity']# doesn't match the read capacity returned from the service's table description.");
-		assertEquals(awsTableDescription.getProvisionedThroughput().getWriteCapacityUnits(), stArgs["writeCapacity"], "The specified write capacity of #stArgs['writeCapacity']# doesn't match the write capacity returned from the service's table description.");
+		assertEquals(stTableInfo["readCapacity"], stArgs["readCapacity"], "The specified read capacity of #stArgs['readCapacity']# doesn't match the read capacity returned from the service's table description.");
+		assertEquals(stTableInfo["writeCapacity"], stArgs["writeCapacity"], "The specified write capacity of #stArgs['writeCapacity']# doesn't match the write capacity returned from the service's table description.");
 	}
 
 
-/*
+
 	public void function tableShouldBeCreatedWithSpecifiedStringHashKey() {
 		// Setup an argument collection
 		var stArgs = {};
 		stArgs["tableName"] = "cfdynamo-unit-tests-" & createUUID();
 		stArgs["hashKeyName"] = "myTestHashKeyName";
 		stArgs["hashKeyType"] = "String";
+
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		oAWSMock.$("createTable", createObject("java", "com.amazonaws.services.dynamodb.model.CreateTableResult")
+			.init()
+			.withTableDescription(createObject("java", "com.amazonaws.services.dynamodb.model.TableDescription")
+				.init()
+				.withKeySchema(createObject("java", "com.amazonaws.services.dynamodb.model.KeySchema")
+					.init()
+					.withHashKeyElement(createObject("java", "com.amazonaws.services.dynamodb.model.KeySchemaElement")
+						.init()
+						.withAttributeName(stArgs["hashKeyName"])
+						.withAttributeType(CFMLTypeToAWSAttributeValueType(stArgs["hashKeyType"]))
+					)
+				)
+			)
+		);
+		CUT.setAwsDynamoDBClient(oAWSMock);
+
 		// Create our table with custom read/write provisioning that is NOT the default values
-		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
-		writeLog(type="information", file="unittests", text="TEST tableShouldBeCreatedWithSpecifiedStringHashKey generated this table: #awsTableDescription.toString()#");
-		// Pull the KeySchema out of the TableDescription
-		var awsKeySchema = awsTableDescription.getKeySchema();
+		var stTableInfo = CUT.createTable(argumentcollection=stArgs);
 		// Take a look at the name of the hashKey, assert that it is what we specified above
-		assertEquals(stArgs["hashKeyName"], awsKeySchema.getHashKeyElement().getAttributeName());
+		assertEquals(stArgs["hashKeyName"], stTableInfo["keys"]["hashKey"]["name"]);
 		// Now assert that it is of the same data type we specified
-		assertEquals(stArgs["hashKeyType"], awsAttributeValueTypeToCFMLType(awsKeySchema.getHashKeyElement().getAttributeType()));
-		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stArgs["tableName"]);
+		assertEquals(stArgs["hashKeyType"], stTableInfo["keys"]["hashKey"]["type"]);
 	}
-*/
+
 
 /*
 	public void function tableShouldBeCreatedWithSpecifiedNumericHashKey() {
@@ -207,21 +219,21 @@ component
 
 	/**
 	 * @author Adam Bellas
-	 * @displayname Convert AWS AttributeValue Type to CFML Type
-	 * @hint In order to ensure the proper data types were set on fields in the DynamoDB tables I needed some way to compare it to CF types.  This conversion is used to do that.
+	 * @displayname Convert CFML type to AWS AttributeValue Type
+	 * @hint In order to properly set AttributeValue data types on the AWS SDK class instances we need to convert map CFML types to their AWS SDK equivalents.
 	 **/
-	private String function awsAttributeValueTypeToCFMLType(
-		required String val hint="The AWS style attribute type string, which will be S, N, or B")
+	private String function CFMLTypeToAWSAttributeValueType(
+		required String val hint="The CFML style data type string, which will be String or Numeric")
 	{
 		switch (arguments.val) {
-			case "S":
-				return "String";
+			case "String":
+				return "S";
 				break;
-			case "N":
-				return "Numeric";
+			case "Numeric":
+				return "N";
 				break;
-			case "B":
-				throw(type="Application.Validation", message="Cannot convert AWS type #arguments.val# to CFML type.", detail="There is no currently supported conversion in this library from AWS binary to CFML data type.");
+			default:
+				throw(type="Application.Validation", message="Unknown type, cannot convert.", detail="Only String and Numeric can be converted to AWS enumerated attribute value types at this time.");
 				break;
 		}
 	}

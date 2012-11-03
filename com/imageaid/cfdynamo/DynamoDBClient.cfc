@@ -10,12 +10,12 @@ component
 
 {
 
-	
+
 	property name="awsKey" type="string" hint="The AWS Key";
 	property name="awsSecret" type="string" hint="The AWS Secret";
 	property name="awsCredentials" type="object";
 	property name="awsDynamoDBClient" type="object";
-	
+
 	variables.awsKey = "";
 	variables.awsSecret = "";
 
@@ -40,7 +40,7 @@ component
 		}
 		return this;
 	}
-	
+
 
 	/**
 	* @displayname Create Table
@@ -100,13 +100,13 @@ component
 			.withReadCapacityUnits(readCapacityCasted)
 			.withWriteCapacityUnits(writeCapacityCasted);
 
-		// Finally, make the create table request, using all the things we've built up so far        
+		// Finally, make the create table request, using all the things we've built up so far
         var awsTableRequest = createObject("java","com.amazonaws.services.dynamodb.model.CreateTableRequest")
         	.init()
         	.withTableName(pargs.tableName)
         	.withKeySchema(awsKeySchema)
         	.withProvisionedThroughput(awsProvisionedThroughput);
-        
+
         // Perform the request in a try purely to give us a way to log it.  We love log files!
         try {
         	var awsCreateTableResult = variables.awsDynamoDBClient.createTable(awsTableRequest);
@@ -115,7 +115,7 @@ component
         	writeLog(type="Error",text="Error during createTable: #e.type# :: #e.message#", file="dynamodb");
         	rethrow;
         }
-		return awsCreateTableResult.getTableDescription();
+		return convertAWSTableDescriptionToStruct(awsCreateTableResult.getTableDescription());
 	}
 
 
@@ -134,16 +134,9 @@ component
         	.withTableName(pargs["tableName"]);
         var result = awsDynamoDBClient.describeTable(awsDescribeTableRequest);
         var awsTableDescription = result.getTable();
-
-        // The result is messy for ColdFusion so let's map it to a basic struct with the properties of the table as keys
-		var stTableInfo = {};
-		stTableInfo["name"] = awsTableDescription.getTableName();
-		stTableInfo["status"] = awsTableDescription.getTableStatus();
-		stTableInfo["read capacity"] = awsTableDescription.getProvisionedThroughput().getReadCapacityUnits();
-		stTableInfo["write capacity"] = awsTableDescription.getProvisionedThroughput().getWriteCapacityUnits();
-		// Return the struct
-		return stTableInfo;
-    }	
+		// Return the result as a struct
+		return convertAWSTableDescriptionToStruct(awsTableDescription);
+    }
 
 
 	/**
@@ -174,7 +167,7 @@ component
 			.withTableName(pargs.tableName)
 			.withProvisionedThroughput(awsProvisionedThroughput);
 
-		// Make the call to AWS        
+		// Make the call to AWS
         try{
         	var result = variables.awsDynamoDBClient.updateTable(update_table_request);
         }
@@ -186,7 +179,7 @@ component
         // Always return true since we throw an exception if something went wrong
 		return true;
 	}
-	
+
 
 	/**
 	* @displayname Delete Table
@@ -213,7 +206,7 @@ component
         // Don't return anything. This could be enhanced to return the details of the table that was deleted, if necessary.
         return;
 	}
-	
+
 
 	/**
 	* @displayname List Tables
@@ -239,7 +232,7 @@ component
 		// Make the call to AWS, returning the result
 		return variables.awsDynamoDBClient.listTables(awsTableRequest).getTableNames();
 	}
-	
+
 
 	/**
 	* @displayname Put Item
@@ -538,7 +531,7 @@ component
 		var awsScanRequest = createObject("java", "com.amazonaws.services.dynamodb.model.ScanRequest")
 			.init()
 			.withTableName(pargs.tableName);
-	
+
 		// Examine the arguments scope for valid additional filter parameters
 		if (structKeyExists(pargs, "conditions") && arrayLen(pargs.conditions))
 		{
@@ -582,7 +575,7 @@ component
 
 	PRIVATE METHODS
 
-	**/	
+	**/
 
 
 	/**
@@ -651,7 +644,7 @@ component
 			if (isNumeric(val))
 			{
 				dynamo_map.put(
-					"#key#", 
+					"#key#",
 					createObject("java","com.amazonaws.services.dynamodb.model.AttributeValue").init().withN(val)
 				);
 			}
@@ -659,7 +652,7 @@ component
 			{
 				// Binary objects have their own way of being dealt with
 				dynamo_map.put(
-					"#key#", 
+					"#key#",
 					createObject("java","com.amazonaws.services.dynamodb.model.AttributeValue").init().withB(val)
 				);
 
@@ -840,6 +833,58 @@ component
 
 		// Return the AWS SDK key instance
 		return awsKey;
+	}
+
+
+    private Struct function convertAWSTableDescriptionToStruct(
+    	required Any awsTableDescription)
+    {
+        // The TableDescription instance is messy for ColdFusion so let's map it to a basic struct with the properties of the table as keys
+		var stTableInfo = {};
+		stTableInfo["tableName"] = arguments.awsTableDescription.getTableName();
+		stTableInfo["status"] = arguments.awsTableDescription.getTableStatus();
+		var awsProvisionedThroughput = arguments.awsTableDescription.getProvisionedThroughput();
+		if (isDefined("awsProvisionedThroughput")) {
+			stTableInfo["readCapacity"] = awsProvisionedThroughput.getReadCapacityUnits();
+			stTableInfo["writeCapacity"] = awsProvisionedThroughput.getWriteCapacityUnits();
+		}
+		stTableInfo["keys"] = {};
+		stTableInfo["keys"]["hashKey"] = {};
+		var awsKeySchema = arguments.awsTableDescription.getKeySchema();
+		if (isDefined("awsKeySchema")) {
+			var awsHashKeyElement = awsKeySchema.getHashKeyElement();
+			stTableInfo["keys"]["hashKey"]["name"] = awsHashKeyElement.getAttributeName();
+			stTableInfo["keys"]["hashKey"]["type"] = awsAttributeValueTypeToCFMLType(awsHashKeyElement.getAttributeType());
+			var awsRangeKeyElement = awsKeySchema.getRangeKeyElement();
+			if (isDefined("awsRangeKeyElement")) {
+				stTableInfo["keys"]["rangeKey"] = {};
+				stTableInfo["keys"]["rangeKey"]["name"] = awsRangeKeyElement.getAttributeName();
+				stTableInfo["keys"]["rangeKey"]["type"] = awsAttributeValueTypeToCFMLType(awsRangeKeyElement.getAttributeType());
+			}
+		}
+		return stTableInfo;
+    }
+
+
+	/**
+	 * @author Adam Bellas
+	 * @displayname Convert AWS AttributeValue Type to CFML Type
+	 * @hint In order to ensure the proper data types were set on fields in the DynamoDB tables I needed some way to compare it to CF types.  This conversion is used to do that.
+	 **/
+	private String function awsAttributeValueTypeToCFMLType(
+		required String val hint="The AWS style attribute type string, which will be S, N, or B")
+	{
+		switch (arguments.val) {
+			case "S":
+				return "String";
+				break;
+			case "N":
+				return "Numeric";
+				break;
+			case "B":
+				throw(type="Application.Validation", message="Cannot convert AWS type #arguments.val# to CFML type.", detail="There is no currently supported conversion in this library from AWS binary to CFML data type.");
+				break;
+		}
 	}
 
 
