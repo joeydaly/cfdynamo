@@ -9,7 +9,8 @@ component {
 	this.name = "cfdynamo-sample-application";
 	this.sessionmanagement = false;
 	this.enablerobustexception  = "true";
-	this.mappings["/mxunit"] = expandPath("/lib/mxunit");
+	this.mappings["/mxunit"] = expandPath("/mxunit");
+	this.mappings["/com"] = expandPath("/com");
 
 	// orm settings
 	this.ormEnabled = false;
