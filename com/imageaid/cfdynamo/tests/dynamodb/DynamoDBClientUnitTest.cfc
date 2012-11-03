@@ -137,7 +137,7 @@ component
 		);
 		CUT.setAwsDynamoDBClient(oAWSMock);
 
-		// Create our table with custom read/write provisioning that is NOT the default values
+		// Create our table with a specifically named string hash key
 		var stTableInfo = CUT.createTable(argumentcollection=stArgs);
 		// Take a look at the name of the hashKey, assert that it is what we specified above
 		assertEquals(stArgs["hashKeyName"], stTableInfo["keys"]["hashKey"]["name"]);
@@ -146,26 +146,39 @@ component
 	}
 
 
-/*
 	public void function tableShouldBeCreatedWithSpecifiedNumericHashKey() {
 		// Setup an argument collection
 		var stArgs = {};
 		stArgs["tableName"] = "cfdynamo-unit-tests-" & createUUID();
 		stArgs["hashKeyName"] = "myTestHashKeyName";
 		stArgs["hashKeyType"] = "Numeric";
-		// Create our table with custom read/write provisioning that is NOT the default values
-		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
-		writeLog(type="information", file="unittests", text="TEST tableShouldBeCreatedWithSpecifiedNumericHashKey generated this table: #awsTableDescription.toString()#");
-		// Pull the KeySchema out of the TableDescription
-		var awsKeySchema = awsTableDescription.getKeySchema();
+
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		oAWSMock.$("createTable", createObject("java", "com.amazonaws.services.dynamodb.model.CreateTableResult")
+			.init()
+			.withTableDescription(createObject("java", "com.amazonaws.services.dynamodb.model.TableDescription")
+				.init()
+				.withKeySchema(createObject("java", "com.amazonaws.services.dynamodb.model.KeySchema")
+					.init()
+					.withHashKeyElement(createObject("java", "com.amazonaws.services.dynamodb.model.KeySchemaElement")
+						.init()
+						.withAttributeName(stArgs["hashKeyName"])
+						.withAttributeType(CFMLTypeToAWSAttributeValueType(stArgs["hashKeyType"]))
+					)
+				)
+			)
+		);
+		CUT.setAwsDynamoDBClient(oAWSMock);
+
+		// Create our table with a specifically named numeric hash key
+		var stTableInfo = CUT.createTable(argumentcollection=stArgs);
 		// Take a look at the name of the hashKey, assert that it is what we specified above
-		assertEquals(stArgs["hashKeyName"], awsKeySchema.getHashKeyElement().getAttributeName());
+		assertEquals(stArgs["hashKeyName"], stTableInfo["keys"]["hashKey"]["name"]);
 		// Now assert that it is of the same data type we specified
-		assertEquals(stArgs["hashKeyType"], awsAttributeValueTypeToCFMLType(awsKeySchema.getHashKeyElement().getAttributeType()));
-		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stArgs["tableName"]);
+		assertEquals(stArgs["hashKeyType"], stTableInfo["keys"]["hashKey"]["type"]);
 	}
-*/
 
 
 /*
