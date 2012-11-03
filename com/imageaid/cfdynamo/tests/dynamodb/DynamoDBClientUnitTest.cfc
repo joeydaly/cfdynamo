@@ -80,23 +80,38 @@ component
 	}
 
 
-/*
 	public void function createTableShouldAssignReadWriteThroughput() {
 		// Setup an argument collection
 		var stArgs = {};
 		stArgs["tableName"] = "cfdynamo-unit-tests-" & createUUID();
 		stArgs["readCapacity"] = 7;
 		stArgs["writeCapacity"] = 3;
+
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		oAWSMock.$("createTable", createObject("java", "com.amazonaws.services.dynamodb.model.CreateTableResult")
+			.init()
+			.withTableDescription(createObject("java", "com.amazonaws.services.dynamodb.model.TableDescription")
+				.init()
+				.withTableName(stArgs["tableName"])
+				.withProvisionedThroughput(createObject("java", "com.amazonaws.services.dynamodb.model.ProvisionedThroughputDescription")
+					.init()
+					.withReadCapacityUnits(stArgs["readCapacity"])
+					.withWriteCapacityUnits(stArgs["writeCapacity"])
+				)
+			)
+		);
+		CUT.setAwsDynamoDBClient(oAWSMock);
+
 		// Create our table with custom read/write provisioning that is NOT the default values
 		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
 		writeLog(type="information", file="unittests", text="TEST createTableShouldAssignReadWriteThroughput generated this table: #awsTableDescription.toString()#");
 		// Assert that our returned values from the serice report true
 		assertEquals(awsTableDescription.getProvisionedThroughput().getReadCapacityUnits(), stArgs["readCapacity"], "The specified read capacity of #stArgs['readCapacity']# doesn't match the read capacity returned from the service's table description.");
 		assertEquals(awsTableDescription.getProvisionedThroughput().getWriteCapacityUnits(), stArgs["writeCapacity"], "The specified write capacity of #stArgs['writeCapacity']# doesn't match the write capacity returned from the service's table description.");
-		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stArgs["tableName"]);
 	}
-*/
+
 
 /*
 	public void function tableShouldBeCreatedWithSpecifiedStringHashKey() {
