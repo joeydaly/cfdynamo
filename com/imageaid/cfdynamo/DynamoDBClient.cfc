@@ -112,7 +112,7 @@ component
         	var awsCreateTableResult = variables.awsDynamoDBClient.createTable(awsTableRequest);
         }
         catch(Any e) {
-        	writeLog(type="Error",text="#e.type# :: #e.message#", file="dynamodb");
+        	writeLog(type="Error",text="Error during createTable: #e.type# :: #e.message#", file="dynamodb");
         	rethrow;
         }
 		return awsCreateTableResult.getTableDescription();

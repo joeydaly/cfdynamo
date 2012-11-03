@@ -62,6 +62,14 @@
 	public void function afterTests() {
 		// Delete all tables that were made during the integration tests
 		for (var table in variables.tablesCreated) {
+			// Check to see that the status is active - we can't delete a table that's being created, and it takes
+			// up to a minute for the creation to complete. Note that this will slow down the completion fo the test.
+			do {
+				sleep(2000);
+				// Log this for debug purposes. I hate when good loops go bad and you don't know why.
+				writeLog(type="information", file="unittests", text="Sleeping for two seconds waiting for #CUT.getTableInformation(table).status# to be ACTIVE.");
+			} while (CUT.getTableInformation(table).status != "ACTIVE");
+			// If we made it here, we're out of the loop and the table is active, which is to say it's ready to be deleted
 			CUT.deleteTable(table);
 		}
 	}
