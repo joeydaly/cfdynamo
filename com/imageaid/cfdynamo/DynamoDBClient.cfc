@@ -44,9 +44,9 @@ component
 
 	/**
 	* @displayname Create Table
-	* @hint Creates a new DynamoDB table.
+	* @hint Creates a new DynamoDB table. The return is an instance of the TableDescription AWS Java class.  Use the toString method on it for simple info about the table that was just created.
 	*/
-	public Void function createTable(
+	public Any function createTable(
 		required String tableName hint="Name of the table to be created"
 		, required String hashKeyName="id" hint="Name of the field in the table that will function as the primary key"
 		, required String hashKeyType="numeric"
@@ -109,13 +109,13 @@ component
         
         // Perform the request in a try purely to give us a way to log it.  We love log files!
         try {
-        	variables.awsDynamoDBClient.createTable(awsTableRequest);
+        	var awsCreateTableResult = variables.awsDynamoDBClient.createTable(awsTableRequest);
         }
         catch(Any e) {
         	writeLog(type="Error",text="#e.type# :: #e.message#", file="dynamodb");
         	rethrow;
         }
-		return;
+		return awsCreateTableResult.getTableDescription();
 	}
 
 

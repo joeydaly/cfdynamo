@@ -1,6 +1,14 @@
 ﻿component extends="mxunit.framework.TestCase" name="DynamoDBTest" displayName="DynamoDBTest" hint="I test the various DynamoDB interactions"{
 	
-	public void function setUp(){
+
+
+	public void function beforeTests() {
+		// Start tracking all tables that are created so we can delete them when we're done.
+		variables.tablesCreated = [];
+	}
+
+
+	public void function setup() {
 		credentials = xmlParse(expandPath("/aws_credentials.xml"));
 		CUT = new com.imageaid.cfdynamo.DynamoDBClient(
 			awsKey = credentials.cfdynamo.access_key.xmlText, 
@@ -18,20 +26,44 @@
 
 	public void function createTableWithJustUniqueNameShouldCreateTable() {
 		// Let's create a guaranteed unique tablename
-		var sTableName = createUUID();
-		var createTableResult = CUT.createTable(tableName=sTableName);
+		var sTableName = "cfdynamo-unit-tests-" & createUUID();
+		var awsTableDescription = CUT.createTable(tableName=sTableName);
 		assertFalse(isDefined("result"));
-		// Now get all the tables so we can look for the one that was just created
-		var listTablesResult = CUT.listTables();
-		var bTableExists = false;
-		for (var table in listTablesResult) {
-			if (table == sTableName) {
-				bTableExists = true;
-				break;
-			}
-		}
 		// Make sure we found our table in the list of tables
-		assertTrue(bTableExists);
+		assertEquals(sTableName, awsTableDescription.getTableName(), "The resulting table description instance should be reporing a table name of '#sTableName#' but is instead reporting '#awsTableDescription.getTableName()#'.");
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, sTableName);
+	}
+	
+	
+	public void function createTableWithEmptyNameShouldThrowException()
+		mxunit:expectedException="com.amazonaws.AmazonServiceException"
+	{
+		var result = CUT.createTable(tableName="");
+	}
+	
+	
+	public void function createTableShouldAssignReadWriteThroughput() {
+		// Setup an argument collection
+		var stArgs = {};
+		stArgs["tableName"] = "cfdynamo-unit-tests-" & createUUID();
+		stArgs["readCapacity"] = 7;
+		stArgs["writeCapacity"] = 3;
+		// Create our table with custom read/write provisioning that is NOT the default values
+		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Assert that our returned values from the serice report true
+		assertEquals(awsTableDescription.getProvisionedThroughput().getReadCapacityUnits(), stArgs["readCapacity"]);
+		assertEquals(awsTableDescription.getProvisionedThroughput().getWriteCapacityUnits(), stArgs["writeCapacity"]);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stArgs["tableName"]);
+	}
+	
+	
+	public void function afterTests() {
+		// Delete all tables that were made during the integration tests
+		for (var table in variables.tablesCreated) {
+			CUT.deleteTable(table);
+		}
 	}
 /*
 	public void function test_list_tables(){
