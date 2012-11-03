@@ -16,6 +16,24 @@
 	}
 
 
+	public void function createTableWithJustUniqueNameShouldCreateTable() {
+		// Let's create a guaranteed unique tablename
+		var sTableName = createUUID();
+		var createTableResult = CUT.createTable(tableName=sTableName);
+		assertFalse(isDefined("result"));
+		// Now get all the tables so we can look for the one that was just created
+		var listTablesResult = CUT.listTables();
+		var bTableExists = false;
+		for (var table in listTablesResult) {
+			if (table == sTableName) {
+				bTableExists = true;
+				break;
+			}
+		}
+		// Make sure we found our table in the list of tables
+		assertTrue(bTableExists);
+	}
+/*
 	public void function test_list_tables(){
 		assertFalse(true,"Dang, list tables should be false.");
 	} 
@@ -39,5 +57,8 @@
 	public void function test_update_table(){
 		assertFalse(true,"Dang, update table should be false.");
 	}
+*/
+
+
 	
 }
