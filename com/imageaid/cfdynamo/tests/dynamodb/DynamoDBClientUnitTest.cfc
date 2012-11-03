@@ -181,26 +181,46 @@ component
 	}
 
 
-/*
 	public void function tableShouldBeCreatedWithSpecifiedStringRangeKey() {
 		// Setup an argument collection
 		var stArgs = {};
 		stArgs["tableName"] = "cfdynamo-unit-tests-" & createUUID();
-		stArgs["rangeKeyName"] = "myTestHashKeyName";
+		stArgs["hashKeyName"] = "myTestHashKeyName";
+		stArgs["hashKeyType"] = "String";
+		stArgs["rangeKeyName"] = "myTestRangeKeyName";
 		stArgs["rangeKeyType"] = "String";
-		// Create our table with custom read/write provisioning that is NOT the default values
-		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
-		writeLog(type="information", file="unittests", text="TEST tableShouldBeCreatedWithSpecifiedStringRangeKey generated this table: #awsTableDescription.toString()#");
-		// Pull the KeySchema out of the TableDescription
-		var awsKeySchema = awsTableDescription.getKeySchema();
+
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		oAWSMock.$("createTable", createObject("java", "com.amazonaws.services.dynamodb.model.CreateTableResult")
+			.init()
+			.withTableDescription(createObject("java", "com.amazonaws.services.dynamodb.model.TableDescription")
+				.init()
+				.withKeySchema(createObject("java", "com.amazonaws.services.dynamodb.model.KeySchema")
+					.init()
+					.withHashKeyElement(createObject("java", "com.amazonaws.services.dynamodb.model.KeySchemaElement")
+						.init()
+						.withAttributeName(stArgs["hashKeyName"])
+						.withAttributeType(CFMLTypeToAWSAttributeValueType(stArgs["hashKeyType"]))
+					)
+					.withRangeKeyElement(createObject("java", "com.amazonaws.services.dynamodb.model.KeySchemaElement")
+						.init()
+						.withAttributeName(stArgs["rangeKeyName"])
+						.withAttributeType(CFMLTypeToAWSAttributeValueType(stArgs["rangeKeyType"]))
+					)
+				)
+			)
+		);
+		CUT.setAwsDynamoDBClient(oAWSMock);
+
+		// Create our table with custom named string rangeKey
+		var stTableInfo = CUT.createTable(argumentcollection=stArgs);
 		// Take a look at the name of the rangeKey, assert that it is what we specified above
-		assertEquals(stArgs["rangeKeyName"], awsKeySchema.getRangeKeyElement().getAttributeName());
+		assertEquals(stArgs["rangeKeyName"], stTableInfo["keys"]["rangeKey"]["name"]);
 		// Now assert that it is of the same data type we specified
-		assertEquals(stArgs["rangeKeyType"], awsAttributeValueTypeToCFMLType(awsKeySchema.getRangeKeyElement().getAttributeType()));
-		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stArgs["tableName"]);
+		assertEquals(stArgs["rangeKeyType"], stTableInfo["keys"]["rangeKey"]["type"]);
 	}
-*/
 
 
 /*
