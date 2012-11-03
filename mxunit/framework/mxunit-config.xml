@@ -13,7 +13,7 @@
   1. Mapped or installed directly under webroot: mxunit [Default]
   2. Mapped or installed in a subdirectory under webroot: mysubdirectory.mxunit
   --> 
-  <config-element type="userConfig" name="componentRoot" value="mxunit" override="false" /> 
+  <config-element type="userConfig" name="componentRoot" value="lib.mxunit" override="false" /> 
 
 
   <!-- 
