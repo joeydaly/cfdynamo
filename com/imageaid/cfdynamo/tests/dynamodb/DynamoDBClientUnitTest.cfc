@@ -46,9 +46,7 @@ component
 		var stArgs = {};
 		stArgs["tableName"] = "cfdynamo-unit-tests-" & createUUID();
 
-		// Extract the Java client from the CUT
-		// var awsClient = CUT.getAwsDynamoDBClient();
-		// Mock it and redefine the createTable function to skip any outreach to actual AWS services,
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
 		// and basically setup the very table information we asked it to set in the first place.
 		var oAWSMock = variables.mockBox.createStub();
 		oAWSMock.$("createTable", createObject("java", "com.amazonaws.services.dynamodb.model.CreateTableResult")
@@ -68,13 +66,19 @@ component
 		assertEquals(stArgs["tableName"], awsTableDescription.getTableName(), "The resulting table description instance should be reporing a table name of '#stArgs.tableName#' but is instead reporting '#awsTableDescription.getTableName()#'.");
 	}
 
-/*
+
 	public void function createTableWithEmptyNameShouldThrowException()
 		mxunit:expectedException="com.amazonaws.AmazonServiceException"
 	{
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		oAWSMock.$(method="createTable", throwException=true, throwType="com.amazonaws.AmazonServiceException", throwMessage="The paramater 'tableName' must be at least 3 characters long and at most 255 characters long", throwDetail="This is a mocked exception.");
+		CUT.setAwsDynamoDBClient(oAWSMock);
+		// Perform the testing operation
 		var result = CUT.createTable(tableName="");
 	}
-*/
+
 
 /*
 	public void function createTableShouldAssignReadWriteThroughput() {
