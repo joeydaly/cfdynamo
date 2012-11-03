@@ -2,6 +2,8 @@
 	
 
 
+	/** MXUnit Test Preparation **/
+	
 	public void function beforeTests() {
 		// Start tracking all tables that are created so we can delete them when we're done.
 		variables.tablesCreated = [];
@@ -15,6 +17,10 @@
 			awsSecret = credentials.cfdynamo.secret_key.xmlText
 		);
 	}
+	
+
+	/** Begin the tests **/
+	
 	
 	public void function awsDynamoDBNorthVirginiaShoudlBeAlive() {
 		var expected = "Service is operating normally";
@@ -59,6 +65,53 @@
 	}
 	
 	
+	public void function tableShouldBeCreatedWithSpecifiedHashKeyNameAndType() {
+		// Setup an argument collection
+		var stArgs = {};
+		stArgs["tableName"] = "cfdynamo-unit-tests-" & createUUID();
+		stArgs["hashKeyName"] = "myTestHashKeyName";
+		stArgs["hashKeyType"] = "String";
+		// Create our table with custom read/write provisioning that is NOT the default values
+		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Pull the KeySchema out of the TableDescription
+		var awsKeySchema = awsTableDescription.getKeySchema();
+		// Take a look at the name of the hashKey, assert that it is what we specified above
+		assertEquals(stArgs["hashKeyName"], awsKeySchema.getHashKeyElement().getAttributeName());
+		// Now assert that it is of the same data type we specified
+		assertEquals(stArgs["hashKeyType"], awsAttributeValueTypeToCFMLType(awsKeySchema.getHashKeyElement().getAttributeType()));
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stArgs["tableName"]);
+	}
+	
+
+	/** Private helper methods, these are not tests **/
+	
+	
+	/**
+	 * @author Adam Bellas
+	 * @displayname Convert AWS AttributeValue Type to CFML Type
+	 * @hint In order to ensure the proper data types were set on fields in the DynamoDB tables I needed some way to compare it to CF types.  This conversion is used to do that.
+	 **/
+	private String function awsAttributeValueTypeToCFMLType(
+		required String val hint="The AWS style attribute type string, which will be S, N, or B")
+	{
+		switch (arguments.val) {
+			case "S":
+				return "String";
+				break;
+			case "N":
+				return "Numeric";
+				break;
+			case "B":
+				throw(type="Application.Validation", message="Cannot convert AWS type #arguments.val# to CFML type.", detail="There is no currently supported conversion in this library from AWS binary to CFML data type.");
+				break;
+		}
+	}
+	
+		
+	/** End of tests, begin cleanup method **/
+	
+	
 	public void function afterTests() {
 		// Delete all tables that were made during the integration tests
 		for (var table in variables.tablesCreated) {
@@ -67,7 +120,7 @@
 			do {
 				sleep(2000);
 				// Log this for debug purposes. I hate when good loops go bad and you don't know why.
-				writeLog(type="information", file="unittests", text="Sleeping for two seconds waiting for #CUT.getTableInformation(table).status# to be ACTIVE.");
+				writeLog(type="information", file="unittests", text="Sleeping for two seconds waiting for table #table#'s status, which is now #CUT.getTableInformation(table).status#, to be ACTIVE.");
 			} while (CUT.getTableInformation(table).status != "ACTIVE");
 			// If we made it here, we're out of the loop and the table is active, which is to say it's ready to be deleted
 			CUT.deleteTable(table);
