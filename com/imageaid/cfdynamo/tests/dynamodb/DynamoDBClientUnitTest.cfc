@@ -438,13 +438,45 @@ component
 	/** Tests for batchPutItems **/
 
 
-	public Void function batchPutItemsShouldReturnImmediatelyWhenGivenZeroItems() {
-		assertTrue(false);
+	public Void function batchPutItemsShouldThrowExceptionWhenGivenZeroItems()
+		mxunit:expectedException="API.InvalidParameters"
+	{
+		// Setup an argument collection
+		var stArgs = {};
+		stArgs["tableName"] = "someTableThatContainsExistingRecord";
+		stArgs["items"] = [];
+		// Perform the batch operation
+		var awsBatchWriteItemResult = CUT.batchPutItems(argumentcollection=stArgs);
 	}
 
 
 	public Void function batchPutItemsShouldLoopOverUnprocessedItemsUntilComplete() {
+		// Setup an argument collection
+		var stArgs = {};
+		stArgs["tableName"] = "someTableThatContainsExistingRecord";
+		stArgs["items"] = [
+			{"Id":300, "Name":"gumdrops", "payload":["alpha","beta","delta","gamma"], "likeChocolate":"true","cows":10}
+			, {"Id":3001, "Title":"shoemonkey", "Brand":"Pepsi Co.", "likeChocolate":"false","cows":0}
+			, {"Id":302, "Title":"rimbot", "Brand":"Mattel", "likeChocolate":"true","cows":42752659}
+			, {"Id":303, "Title":"pony", "Brand":"Johnson & Johnson", "likeChocolate":"true","cows":559}
+			, {"Id":304, "Title":"swiss", "Brand":"Nestles", "likeChocolate":"false","cows":1337}
+			, {"Id":305, "Title":"Carl", "Brand":"Bughatti", "likeChocolate":"false","cows":27}
+		];
+		// Setup the complex Java object that will represent a simulated return from the AWS put operation
+		var returnedItem = createObject("java", "java.util.HashMap").init();
+		returnedItem.put("id", createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init().withN("1000"));
+		returnedItem.put("title", createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init().withS("Just some record living in the DynamoDB"));
+		returnedItem.put("Flavor", createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init().withS("chocolate"));
 
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		oAWSMock.$("getItem", createObject("java", "com.amazonaws.services.dynamodb.model.GetItemResult")
+			.init()
+			.withItem(returnedItem)
+		);
+		CUT.setAwsDynamoDBClient(oAWSMock);
+		fail("Test not implemented.");
 	}
 
 
