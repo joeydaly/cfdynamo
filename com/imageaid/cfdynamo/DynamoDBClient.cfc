@@ -646,7 +646,7 @@ component
 	}
 
 
-	private any function struct_to_dynamo_map(required struct cf_structure){
+	public Any function struct_to_dynamo_map(required struct cf_structure){
 		var dynamo_map = createObject("java","java.util.HashMap").init();
 		var val = "";
 		for (var key in arguments.cf_structure )

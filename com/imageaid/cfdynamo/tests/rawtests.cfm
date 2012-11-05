@@ -5,7 +5,7 @@
 	// the local page scope so we can re-instantiate it in case we feel like it here.
 	credentials = xmlParse(expandPath("/aws_credentials.xml"));
 	application.aws.cfdynamo = new com.imageaid.cfdynamo.DynamoDBClient(
-		awsKey = credentials.cfdynamo.access_key.xmlText, 
+		awsKey = credentials.cfdynamo.access_key.xmlText,
 		awsSecret = credentials.cfdynamo.secret_key.xmlText
 	);
 	ddbc = application.aws.cfdynamo;
