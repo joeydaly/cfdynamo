@@ -507,9 +507,23 @@ component
 	}
 
 
+	public Void function batchDeleteItemsShouldThrowExceptionWhenGivenZeroItems()
+		mxunit:expectedException="API.InvalidParameters"
+	{
+		// Setup an argument collection
+		var stArgs = {};
+		stArgs["tableName"] = "someTableThatContainsSomeRecords";
+		stArgs["items"] = [];
+		// Perform the batch operation
+		var awsBatchWriteItemResult = CUT.batchDeleteItems(argumentcollection=stArgs);
+	}
 
 
-	/** Private helper methods, these are not tests **/
+
+
+	/**																						**/
+	/** Private helper methods, these are not tests 										**/
+	/**																						**/
 
 
 

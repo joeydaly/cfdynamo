@@ -426,6 +426,10 @@ component
 		required String tableName hint="Name of the table into which the provided data will be inserted as a record."
 		, required Array items hint="Collection (array) of Structs that are each containing the necessary keys that identify records to be deleted from the specified table.")
 	{
+		// Don't bother with the call in any way if we don't have at least one item in the item collection
+		if (arrayLen(arguments.items) < 1) {
+			throw(type="API.InvalidParameters", message="The items collection passed to batchDeleteItems must contain at least one item.");
+		}
 		// Make a sanitized version of arguments scoped values we will use
 		var pargs = {
 			"tableName" = trim(arguments.tableName),
