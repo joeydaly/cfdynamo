@@ -371,6 +371,84 @@ component
 	}
 
 
+	/** Tests for getItem **/
+
+
+	public Void function getItemByHashKeyWillYieldRecord() {
+		// Setup an argument collection
+		var stArgs = {};
+		stArgs["tableName"] = "someTableThatContainsExistingRecord";
+		stArgs["hashKey"] = 1000;
+		stArgs["attributeNames"] = "id,title,Flavor";
+
+		// Setup the complex Java object that will represent a simulated return from the AWS put operation
+		var returnedItem = createObject("java", "java.util.HashMap").init();
+		returnedItem.put("id", createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init().withN("1000"));
+		returnedItem.put("title", createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init().withS("Just some record living in the DynamoDB"));
+		returnedItem.put("Flavor", createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init().withS("chocolate"));
+
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		oAWSMock.$("getItem", createObject("java", "com.amazonaws.services.dynamodb.model.GetItemResult")
+			.init()
+			.withItem(returnedItem)
+		);
+		CUT.setAwsDynamoDBClient(oAWSMock);
+
+		// Perform the getItem operation. We are expecting a CFML native struct that contains the item.
+		var stItem = CUT.getItem(argumentcollection=stArgs);
+		// Assert that the returning structure has some keys in it. It's not important for this test that we verify the returned
+		// item matches the attributes of what was defined above. That would be for integration testing.
+		assertTrue(listLen(structKeyList(stItem)) > 0, "There are no keys in the struct that returned, which should not happen when updating an item.");
+	}
+
+
+	public Void function getItemByHashAndRangeKeyWillYieldRecord() {
+		// Setup an argument collection
+		var stArgs = {};
+		stArgs["tableName"] = "someTableThatContainsExistingRecord";
+		stArgs["hashKey"] = 1000;
+		stArgs["RangeKey"] = "SomeCrazyRangeKey";
+		stArgs["attributeNames"] = "id,title,Flavor";
+
+		// Setup the complex Java object that will represent a simulated return from the AWS put operation
+		var returnedItem = createObject("java", "java.util.HashMap").init();
+		returnedItem.put("id", createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init().withN("1000"));
+		returnedItem.put("title", createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init().withS("Just some record living in the DynamoDB"));
+		returnedItem.put("Flavor", createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init().withS("chocolate"));
+
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		oAWSMock.$("getItem", createObject("java", "com.amazonaws.services.dynamodb.model.GetItemResult")
+			.init()
+			.withItem(returnedItem)
+		);
+		CUT.setAwsDynamoDBClient(oAWSMock);
+
+		// Perform the getItem operation. We are expecting a CFML native struct that contains the item.
+		var stItem = CUT.getItem(argumentcollection=stArgs);
+		// Assert that the returning structure has some keys in it. It's not important for this test that we verify the returned
+		// item matches the attributes of what was defined above. That would be for integration testing.
+		assertTrue(listLen(structKeyList(stItem)) > 0, "There are no keys in the struct that returned, which should not happen when updating an item.");
+	}
+
+
+	/** Tests for batchPutItems **/
+
+
+	public Void function batchPutItemsShouldReturnImmediatelyWhenGivenZeroItems() {
+		assertTrue(false);
+	}
+
+
+	public Void function batchPutItemsShouldLoopOverUnprocessedItemsUntilComplete() {
+
+	}
+
+
+
 
 	/** Private helper methods, these are not tests **/
 
