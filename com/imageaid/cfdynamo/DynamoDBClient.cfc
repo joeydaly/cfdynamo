@@ -240,7 +240,7 @@ component
 	* @displayname Put Item
 	* @hint Adds a record to a specified DynamoDB table.  The entirety of the record is specified by a single simple struct.  Note that DynamoDB only supports structs two levels deep, i.e. you can have a struct of strings as the value for one of you top level struct keys, however you cannot then embed deeper structs within that.
 	*/
-	public Any function putItem(
+	public Struct function putItem(
 		required string tableName hint="Name of the table into which the provided data will be inserted as a record."
 		, required struct item hint="Struct containing the data that is to become the new record in the table.")
 	{
@@ -254,8 +254,12 @@ component
 			.withTableName(pargs.tableName)
 			.withItem(struct_to_dynamo_map(pargs.item))
 			.withReturnValues(createObject("java", "com.amazonaws.services.dynamodb.model.ReturnValue").ALL_OLD);
-		var result = variables.awsDynamoDBClient.putItem(awsPutItemRequest);
-		return result;
+		var awsPutItemResult = variables.awsDynamoDBClient.putItem(awsPutItemRequest);
+
+		// TODO: It could be beneficial here to log the consumed capacity, since it's present in the result
+
+		// Return the old item that was replaced by the put. Note that this will be null if it was a new record, and so the struct may be empty
+		return dynamo_to_struct_map(awsPutItemResult.getAttributes());
 	}
 
 

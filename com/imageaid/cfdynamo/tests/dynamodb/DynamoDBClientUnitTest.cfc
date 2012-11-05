@@ -315,6 +315,39 @@ component
 	}
 
 
+	/** Tests for putItem **/
+
+
+	public Void function putItemWillYieldOldRecordWhenReplacingExistingItem() {
+		// Setup an argument collection
+		var stArgs = {};
+		stArgs["tableName"] = "someTableThatContainsExistingRecord";
+		stArgs["item"] = {"id":1000, "title":"Replacement for a record that already exists", "Flavor":"vanilla"};
+
+		// Setup the complex Java object that will represent a simulated return from the AWS put operation
+		var returnedItem = createObject("java", "java.util.HashMap").init();
+		returnedItem.put("id", createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init().withN("1000"));
+		returnedItem.put("title", createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init().withS("Replacement for a record that already exists"));
+		returnedItem.put("Flavor", createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init().withS("chocolate"));
+
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		oAWSMock.$("putItem", createObject("java", "com.amazonaws.services.dynamodb.model.PutItemResult")
+			.init()
+			.withAttributes(returnedItem)
+		);
+		CUT.setAwsDynamoDBClient(oAWSMock);
+
+		// Perform the putItem operation. We are expecting a CFML native struct that contains the old item. In this test
+		// scenario, we have updated the record from a flavor of chocolate to that of vanilla.  The old value, chocolate,
+		// is what would be returned by the service according to the AWS SDK documentation.
+		var stOldItem = CUT.putItem(argumentcollection=stArgs);
+		// Assert that the returning structure has some keys in it, which proves it was a replacement, not a new record creation
+		assertTrue(listLen(structKeyList(stOldItem)) > 0, "There are no keys in the struct that returned, which should not happen when updating an item.");
+	}
+
+
 
 	/** Private helper methods, these are not tests **/
 
