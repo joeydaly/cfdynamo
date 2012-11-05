@@ -269,11 +269,6 @@ component
 
 
 	public Void function listTablesShouldReturnArrayOfStrings() {
-		// Setup an argument collection
-		var stArgs = {};
-		// stArgs["startTable"] = "";
-		// stArgs["limit"] = 20;
-
 		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual
 		// AWS services, and basically setup the very table information we asked it to set in the first place.
 		var oAWSMock = variables.mockBox.createStub();
@@ -290,6 +285,33 @@ component
 		assertTrue(isArray(aResultingTableNames), "The value returned from listTables is not an array!");
 		// It needs to be the same array that we fed into the method
 		assertEquals(aInputTableNames, aResultingTableNames, "The array of table names that came out doesn't look like the array that went in.");
+	}
+
+
+	/** Tests for deleteTable **/
+
+
+	public Void function deleteTableShouldReportBackNameOfDeletedTable() {
+		// Setup an argument collection
+		var stArgs = {};
+		stArgs["tableName"] = "someDeletedTableName";
+
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		oAWSMock.$("deleteTable", createObject("java", "com.amazonaws.services.dynamodb.model.DeleteTableResult")
+			.init()
+			.withTableDescription(createObject("java", "com.amazonaws.services.dynamodb.model.TableDescription")
+				.init()
+				.withTableName(stArgs["tableName"])
+			)
+		);
+		CUT.setAwsDynamoDBClient(oAWSMock);
+
+		// Delete the table
+		var stDeletedTableInfo = CUT.deleteTable(argumentcollection=stArgs);
+		// Make sure the name of the table that went in matches the name that came back
+		assertEquals(stArgs["tableName"], stDeletedTableInfo["tableName"], "The name of the deleted table that came out doesn't match the name that went in!");
 	}
 
 

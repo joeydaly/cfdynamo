@@ -183,9 +183,9 @@ component
 
 	/**
 	* @displayname Delete Table
-	* @hint Deletes the specified table. Use with care, there is no confirmation for this operation.  All data will be lost!
+	* @hint Deletes the specified table. Use with care, there is no confirmation for this operation.  All data will be lost! Returns the name of the table that was successfully deleted.
 	*/
-	public Void function deleteTable(
+	public Struct function deleteTable(
 		required String tableName hint="Name of the table that is to be deleted")
 	{
 		// Create a validated and sanitized copy of the arguments scope to be used in this function
@@ -197,14 +197,16 @@ component
 			.withTableName(pargs.tableName);
 		// Attempt the deletion
         try {
-        	var result = variables.awsDynamoDBClient.deleteTable(awsDeleteTableRequest);
+        	var awsDeleteTableResult = variables.awsDynamoDBClient.deleteTable(awsDeleteTableRequest);
         }
         catch(Any e) {
         	writeLog(type="Error",text="#e.type# :: #e.message#", file="dynamodb");
         	rethrow;
         }
-        // Don't return anything. This could be enhanced to return the details of the table that was deleted, if necessary.
-        return;
+        // Pull the table description out of the result and convert it to a struct
+        var stDeletedTableInfo = convertAWSTableDescriptionToStruct(awsDeleteTableResult.getTableDescription());
+        // Return our info struct
+        return stDeletedTableInfo;
 	}
 
 
@@ -250,7 +252,8 @@ component
 		var awsPutItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.PutItemRequest")
 			.init()
 			.withTableName(pargs.tableName)
-			.withItem(struct_to_dynamo_map(pargs.item));
+			.withItem(struct_to_dynamo_map(pargs.item))
+			.withReturnValues(createObject("java", "com.amazonaws.services.dynamodb.model.ReturnValue").ALL_OLD);
 		var result = variables.awsDynamoDBClient.putItem(awsPutItemRequest);
 		return result;
 	}
@@ -839,10 +842,14 @@ component
     private Struct function convertAWSTableDescriptionToStruct(
     	required Any awsTableDescription)
     {
-        // The TableDescription instance is messy for ColdFusion so let's map it to a basic struct with the properties of the table as keys
+        // The TableDescription instance is messy for ColdFusion so let's map
+        // it to a basic struct with the properties of the table as keys
 		var stTableInfo = {};
 		stTableInfo["tableName"] = arguments.awsTableDescription.getTableName();
-		stTableInfo["status"] = arguments.awsTableDescription.getTableStatus();
+		var sStatus = arguments.awsTableDescription.getTableStatus();
+		if (isDefined("sStatus")) {
+			stTableInfo["status"] = arguments.awsTableDescription.getTableStatus();
+		}
 		var awsProvisionedThroughput = arguments.awsTableDescription.getProvisionedThroughput();
 		if (isDefined("awsProvisionedThroughput")) {
 			stTableInfo["readCapacity"] = awsProvisionedThroughput.getReadCapacityUnits();
