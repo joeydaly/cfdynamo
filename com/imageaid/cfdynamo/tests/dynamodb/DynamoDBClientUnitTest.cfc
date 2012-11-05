@@ -371,6 +371,44 @@ component
 	}
 
 
+/* COMMENTED OUT - NOT ABLE TO GENERATE ByteBuffer INSTANCE FOR BINARY TESTING.
+*
+	public Void function connectorCorrectlyIdentifiesBinaryTypesDuringPut() {
+		// Invent a new graphic image in memory we can use as binary (most likely use case)
+		var byteClass = createObject("java", "java.lang.Byte").init(0).getClass();
+		var byteArray = createObject("java", "java.lang.reflect.Array").newInstance(byteClass, 42);
+		var byteBuffer = createObject("java", "java.nio.ByteBuffer");
+		writeDump(byteArray.getClass().getCanonicalName());
+		writeDump(byteBuffer);
+		byteBuffer.wrap(byteArray);
+		// Setup an argument collection
+		var stArgs = {};
+		stArgs["tableName"] = "someTableThatContainsExistingRecord";
+		stArgs["item"] = {"id":1001, "binData":byteBuffer};
+
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		oAWSMock.$("putItem", createObject("java", "com.amazonaws.services.dynamodb.model.PutItemResult")
+			.init()
+		);
+		CUT.setAwsDynamoDBClient(oAWSMock);
+
+		// Perform the operation
+		CUT.putItem(argumentcollection=stArgs);
+		// Pull the reference to the AWS client and inspect it's mock log
+		var stCallLog = CUT.getAwsDynamoDBClient().$callLog();
+
+		writeDump(stCallLog["putItem"][1]);
+		abort;
+
+		// TODO: We need to know, via the mock log, that the type in the AttributeValue that was set
+		// in the item that was put was seen by the CFML logic in the connector lib as binary data.
+
+	}
+*/
+
+
 	/** Tests for getItem **/
 
 
