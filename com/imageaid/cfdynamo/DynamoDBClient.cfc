@@ -259,7 +259,9 @@ component
 		// TODO: It could be beneficial here to log the consumed capacity, since it's present in the result
 
 		// Return the old item that was replaced by the put. Note that this will be null if it was a new record, and so the struct may be empty
-		return dynamo_to_struct_map(awsPutItemResult.getAttributes());
+		var oldItem = awsPutItemResult.getAttributes();
+		if (isDefined("oldItem")) return dynamo_to_struct_map(awsPutItemResult.getAttributes());
+		else return {};
 	}
 
 
