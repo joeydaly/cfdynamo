@@ -519,6 +519,54 @@ component
 	}
 
 
+	public Void function batchDeleteItemsShouldLoopOverUnprocessedItemsUntilComplete() {
+		// Setup an argument collection
+		var stArgs = {};
+		stArgs["tableName"] = "someTableThatContainsExistingRecord";
+		stArgs["items"] = [
+			{"hashKey":1000}
+			, {"hashKey":1001}
+			, {"hashKey":1002}];
+
+		// Setup our simulated request items that will report back from the DDB client
+		var aAwsItems = [];
+		for (var item in stArgs.items)
+		{
+			// Create the WriteRequest
+			var awsWriteRequest = createObject("java", "com.amazonaws.services.dynamodb.model.WriteRequest")
+				.init()
+				.withPutRequest(createObject("java", "com.amazonaws.services.dynamodb.model.PutRequest")
+					.init()
+					.withItem(CUT.struct_to_dynamo_map(item))
+				);
+			// Now append it to our batch array
+			arrayAppend(aAwsItems, awsWriteRequest);
+		}
+
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		// Set up the batchWriteItem method in our mock to first return a result with remaining items
+		// to process, and then the second time return nothing.  After our operation returns we will
+		// assert that the method has been called twice.
+		var oHashMapMock = variables.mockBox.createStub();
+		oHashMapMock.$("getUnprocessedItems", aAwsItems);
+		oHashMapMock.$("size").$results(4, 0)
+		oAWSMock.$("batchWriteItem", createObject("java", "com.amazonaws.services.dynamodb.model.BatchWriteItemResult")
+				.init()
+				.withUnprocessedItems(oHashMapMock)
+		);
+		CUT.setAwsDynamoDBClient(oAWSMock);
+
+		// Perform the batch put item operation
+		CUT.batchDeleteItems(argumentcollection=stArgs);
+
+		// Assert that the batchWriteItem method on our mocked client instance has been called twice
+		var nCallCount = CUT.getAwsDynamoDBClient().$count("batchWriteItem");
+		assertEquals(2, nCallCount, "The batchWriteItem method in our mocked DDB client should have been called twice. It has instead been called #nCallCount# times.");
+	}
+
+
 
 
 	/**																						**/
