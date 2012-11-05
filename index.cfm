@@ -5,6 +5,11 @@
 </p>
 <ul>
 	<li><a href="samples/">Samples</a></li>
-	<li><a href="lib/mxunit/">Unit Tests</li>
-	<li><a href="" onclick="return false;">Integration Tests</a>
+	<li>
+		<a href="com/imageaid/cfdynamo/tests/cfDynamoTestSuite.cfm">Run All Tests</a>
+		<ul>
+			<li><a href="lib/mxunit/">Run Unit Tests</li>
+			<li><a href="" onclick="return false;">Run Integration Tests</a>
+		</ul>
+	</li>
 </ul>

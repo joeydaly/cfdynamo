@@ -105,8 +105,8 @@ component
 		// Create our table with custom read/write provisioning that is NOT the default values
 		var stTableInfo = CUT.createTable(argumentcollection=stArgs);
 		// Assert that our returned values from the serice report true
-		assertEquals(stTableInfo["readCapacity"], stArgs["readCapacity"], "The specified read capacity of #stArgs['readCapacity']# doesn't match the read capacity returned from the service's table description.");
-		assertEquals(stTableInfo["writeCapacity"], stArgs["writeCapacity"], "The specified write capacity of #stArgs['writeCapacity']# doesn't match the write capacity returned from the service's table description.");
+		assertEquals(stArgs["readCapacity"], stTableInfo["readCapacity"], "The specified read capacity of #stArgs['readCapacity']# doesn't match the read capacity returned from the service's table description.");
+		assertEquals(stArgs["writeCapacity"], stTableInfo["writeCapacity"], "The specified write capacity of #stArgs['writeCapacity']# doesn't match the write capacity returned from the service's table description.");
 	}
 
 
@@ -262,6 +262,34 @@ component
 		assertEquals(stArgs["rangeKeyName"], stTableInfo["keys"]["rangeKey"]["name"]);
 		// Now assert that it is of the same data type we specified
 		assertEquals(stArgs["rangeKeyType"], stTableInfo["keys"]["rangeKey"]["type"]);
+	}
+
+
+	/** Tests for listTables **/
+
+
+	public Void function listTablesShouldReturnArrayOfStrings() {
+		// Setup an argument collection
+		var stArgs = {};
+		// stArgs["startTable"] = "";
+		// stArgs["limit"] = 20;
+
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual
+		// AWS services, and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		var aInputTableNames = ["TestTable01","TestTable02","TestTable03","TestTable04"];
+		oAWSMock.$("listTables", createObject("java", "com.amazonaws.services.dynamodb.model.ListTablesResult")
+			.init()
+			.withTableNames(aInputTableNames)
+		);
+		CUT.setAwsDynamoDBClient(oAWSMock);
+
+		// Get our table listing
+		var aResultingTableNames = CUT.listTables();
+		// Make sure it's an array
+		assertTrue(isArray(aResultingTableNames), "The value returned from listTables is not an array!");
+		// It needs to be the same array that we fed into the method
+		assertEquals(aInputTableNames, aResultingTableNames, "The array of table names that came out doesn't look like the array that went in.");
 	}
 
 
