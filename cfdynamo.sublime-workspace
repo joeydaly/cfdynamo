@@ -4,6 +4,38 @@
 		"selected_items":
 		[
 			[
+				"compa",
+				"comparisonValues"
+			],
+			[
+				"range",
+				"rangeKeyType"
+			],
+			[
+				"rangeKey",
+				"rangeKeyName"
+			],
+			[
+				"write",
+				"writeCapacity"
+			],
+			[
+				"prim",
+				"primaryKeyValueType"
+			],
+			[
+				"primary",
+				"primaryKeyValueType"
+			],
+			[
+				"primar",
+				"primaryKeyName"
+			],
+			[
+				"tabl",
+				"tableName"
+			],
+			[
 				"cf",
 				"cf_structure"
 			],
@@ -252,61 +284,10 @@
 	"buffers":
 	[
 		{
-			"file": "index.cfm",
+			"file": "com/imageaid/cfdynamo/tests/rawtests.cfm",
 			"settings":
 			{
-				"buffer_size": 467,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "com/imageaid/cfdynamo/DynamoClient.cfc",
-			"settings":
-			{
-				"buffer_size": 8560,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "samples/delete_table.cfm",
-			"settings":
-			{
-				"buffer_size": 1406,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "samples/list_tables.cfm",
-			"settings":
-			{
-				"buffer_size": 673,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "samples/put_item.cfm",
-			"settings":
-			{
-				"buffer_size": 1638,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "WEB-INF/web.xml",
-			"settings":
-			{
-				"buffer_size": 26453,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"contents": "<h3>Before the script</h3>\n<cfscript>\n\n	// Arrays = createObject(\"java\", \"java.util.Arrays\");\n	aws_creds = createObject(\n		 \"java\"\n		,\"com.amazonaws.auth.BasicAWSCredentials\")\n		.init(\n			 javaCast(\"string\", \"AKIAI7SMV7NVTTLTGO3Q\")\n			,javaCast(\"string\", \"	\"));\n	writeDump(var=aws_creds, expand=false, label=\"Basic AWS Credentials\");\n	\n/*\nvar AWSCredentials = createObject(\"java\",\"com.amazonaws.auth.BasicAWSCredentials\").init(arguments.config.awsAccessKey,arguments.config.awsSecretKey);		\n		var AWSClient = createObject(\"java\",'com.amazonaws.services.elasticache.AmazonElastiCacheClient').init(AWSCredentials);\n*/\ntry{\n	// aws_dynamodb = createObject(\"java\",\"com.amazonaws.services.dynamodb.AmazonDynamoDBClient\").init(aws_creds);\n	aws_dynamodb = createObject(\"java\",\"com.amazonaws.services.dynamodb.AmazonDynamoDBClient\").init();\n	// writeDump(var=aws_dynamodb, expand=false);\n\n}\ncatch(Any e) {\n	writeDump(e);\n	abort;\n}\n\nwriteDump(\"woopee!\"); abort;\n\n\n\n	table_request = createObject(\"java\",\"com.amazonaws.services.dynamodb.model.ListTablesRequest\").init();\n	writeDump(var=table_request, expand=false);\n\n	foo = aws_dynamodb.listTables(table_request);\n	writeDump(var=foo, expand=false);\n\n	put_item_request = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.PutItemRequest\").init();\n	put_item_request.setTableName(\"Reply\");\n	sampleData = {};\n	sampleData[\"Id\"] = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.AttributeValue\").init().withS(\"Adam Test 01\");\n	sampleData[\"ReplyDateTime\"] = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.AttributeValue\").init().withS(\"2012-12-22T00:00:00.000Z\");\n	sampleData[\"Message\"] = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.AttributeValue\").init().withS(\"This is a test.\");\n	sampleData[\"PostedBy\"] = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.AttributeValue\").init().withS(\"Adam Bellas\");\n	sampleData[\"Score\"] = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.AttributeValue\").init().withN(27);\n	sampleData[\"Score\"] = createObject(\"java\", \"com.amazonaws.services.dynamodb.model.AttributeValue\").init().withSS([\"My\",\"test\"]);\n	writeDump(var=sampleData, expand=false);\n\n	put_item_request.setItem(sampleData);\n	writeDump(var=put_item_request, expand=false);\n\n	put_item_response = variables.aws_dynamodb.putItem(put_item_request);\n	writeDump(var=put_item_response, expand=false);\n\n</cfscript>\n<h3>After the script</h3>",
-			"file": "adamtest.cfm",
-			"file_size": 2473,
-			"file_write_time": 1351264314000000,
-			"settings":
-			{
-				"buffer_size": 2434,
+				"buffer_size": 5917,
 				"line_ending": "Unix"
 			}
 		}
@@ -339,14 +320,32 @@
 	},
 	"file_history":
 	[
-		"/Users/abellas/eclipse-workspace/cfdynamo/_Application.cfc",
-		"/Users/abellas/eclipse-workspace/cfdynamo/com/imageaid/cfdynamo/aws_credentials.xml",
-		"/Users/abellas/eclipse-workspace/cfdynamo/samples/create_table.cfm",
-		"/Users/abellas/eclipse-workspace/cfdynamo/samples/list_tables.cfm",
-		"/Users/abellas/eclipse-workspace/cfdynamo/samples/put_item.cfm",
-		"/Users/abellas/eclipse-workspace/cfdynamo/samples/update_table.cfm",
-		"/Users/abellas/eclipse-workspace/cfdynamo/adamtest.cfm",
 		"/Users/abellas/eclipse-workspace/cfdynamo/Application.cfc",
+		"/Users/abellas/eclipse-workspace/cfdynamo/index.cfm",
+		"/Users/abellas/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/Users/abellas/eclipse-workspace/cfdynamo/lib/mxunit/index.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/com/imageaid/cfdynamo/tests/rawtests.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/com/imageaid/cfdynamo/DynamoDBClient.cfc",
+		"/Users/abellas/eclipse-workspace/cfdynamo/samples/index.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/.gitignore",
+		"/Users/abellas/eclipse-workspace/cfdynamo/WEB-INF/railo/cfclasses/.gitignore",
+		"/Users/abellas/eclipse-workspace/cfdynamo/samples/createTable.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/WEB-INF/web.xml",
+		"/Users/abellas/eclipse-workspace/cfdynamo/aws_credentials.xml",
+		"/Users/abellas/eclipse-workspace/cfdynamo/README.markdown",
+		"/Users/abellas/eclipse-workspace/cfdynamo/com/imageaid/cfdynamo/DynamoClient.cfc",
+		"/Users/abellas/eclipse-workspace/cfdynamo/WEB-INF/.htaccess",
+		"/Users/abellas/eclipse-workspace/cfdynamo/WEB-INF/railo/exe-log",
+		"/Users/abellas/eclipse-workspace/cfdynamo/com/imageaid/cfdynamo/aws_credentials.xml",
+		"/Users/abellas/eclipse-workspace/cfdynamo/com/imageaid/cfdynamo/tests/cfDynamoTestSuite.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/samples/test.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/adamtest.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/samples/put_item.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/samples/list_tables.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/samples/delete_table.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/_Application.cfc",
+		"/Users/abellas/eclipse-workspace/cfdynamo/samples/create_table.cfm",
+		"/Users/abellas/eclipse-workspace/cfdynamo/samples/update_table.cfm",
 		"/Users/abellas/eclipse-workspace/cfdynamo/com/imageaid/cfdynamo/aws_credentials_template.xml",
 		"/Users/abellas/eclipse-workspace/cfdynamo/examples/create_table.cfm",
 		"/Users/abellas/Desktop/temp.txt",
@@ -362,7 +361,6 @@
 		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/factory/SupportObject.cfc",
 		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/endpoints/Resource.cfc",
 		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/com/adobe/ex/endpoints/Subject.cfc",
-		"/Users/abellas/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
 		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/documentation/endpoint.cfc",
 		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/documentation/entity.cfc",
 		"/Users/abellas/eclipse-workspace/wb-adobe-ex-api/documentation/detail.cfm",
@@ -465,6 +463,89 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"bug_green",
+			"model.Key",
+			"Key",
+			"key",
+			"comparisonOperatorEnum",
+			"oAttributeValue",
+			"structure",
+			"payload",
+			"Name",
+			"id",
+			"scanRequest",
+			"ScanRequest",
+			"scanRequest",
+			"arguments",
+			"start",
+			"StartKey",
+			"startKey",
+			"start",
+			"structure",
+			"queryRequest",
+			"QueryRequest",
+			"queryRequest",
+			"Condition",
+			"condition",
+			"itemKey",
+			"batchWriteItemRequest",
+			"BatchWriteItemRequest",
+			"batchWriteItemRequest",
+			"oWriteRequest",
+			"DeleteItemRequest",
+			"deleteItemRequest",
+			"get_item_request",
+			"batchWriteItemRequest",
+			"oWriteRequest",
+			"put_response",
+			"put_item_request",
+			"table_name",
+			"table_request",
+			"start_table",
+			"delete_table_request",
+			"table_name",
+			"call_result",
+			"arguments",
+			"provisioned_throughput",
+			"call_result",
+			"table_name",
+			"structure",
+			"table_request",
+			"provisioned_throughput",
+			"key_schema",
+			"hashKey",
+			"hashKeyAWSType",
+			"hash_key",
+			"int",
+			"primary_key_type",
+			"primaryKeyRangeValueType",
+			"primaryKeyRangeName",
+			"primaryKeyType",
+			"primaryKeyName",
+			"primaryKeyValueType",
+			"primaryKeyType",
+			"nu",
+			"str",
+			"pk_range_name",
+			"pk_type",
+			"pk_range_value_type",
+			"pk_range_name",
+			"arguments",
+			"y_c",
+			"Capacity_casted",
+			"write_capacity",
+			"read_capacity",
+			"pk_value_type",
+			"pk_type",
+			"pk_name",
+			"table_name",
+			"aws_zone",
+			"use_https",
+			"\n	",
+			"aws_dynamodb",
+			"aws_creds",
+			"aws_secret",
+			"aws_key",
 			"writeLog",
 			">",
 			"struct_to_dynamo_map",
@@ -509,72 +590,7 @@
 			"speccomplete",
 			"total",
 			"unfollow",
-			"followmem",
-			"Update member",
-			"imService",
-			"imservice",
-			"imService",
-			"imservice",
-			"imService",
-			"imServiceId",
-			"socialNetworkId",
-			"schoolId",
-			"void",
-			"linkId",
-			"attachmentId",
-			"delete member",
-			"member's",
-			"read",
-			"memberId",
-			"oEntity",
-			"sort",
-			"shareId",
-			"attachmentId",
-			"commentId",
-			"versionId",
-			"resourceId",
-			"attachment_id",
-			"document_id",
-			"{id}",
-			"/documents",
-			"this",
-			"(), ",
-			":\"2\"",
-			"member_id",
-			"user",
-			"User",
-			"user",
-			"User",
-			"user",
-			"User",
-			"user",
-			"User",
-			"user",
-			"User",
-			"user",
-			"User",
-			"user",
-			"User",
-			"user",
-			"User",
-			"user",
-			"User",
-			"user",
-			"User",
-			"member",
-			"documents",
-			"member_id",
-			"user",
-			"oDynamicAttributes",
-			"instantMessage",
-			"social",
-			"oDynamicAttributes",
-			"//	",
-			"outer",
-			"result",
-			"qResource.result",
-			"qResource",
-			"ENDPOINT: "
+			"followmem"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -595,23 +611,23 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "index.cfm",
+					"file": "com/imageaid/cfdynamo/tests/rawtests.cfm",
 					"settings":
 					{
-						"buffer_size": 467,
+						"buffer_size": 5917,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								393,
-								393
+								3727,
+								3204
 							]
 						],
 						"settings":
@@ -620,170 +636,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "com/imageaid/cfdynamo/DynamoClient.cfc",
-					"settings":
-					{
-						"buffer_size": 8560,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								8560
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/ColdFusion/ColdFusionCFC.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1955.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "samples/delete_table.cfm",
-					"settings":
-					{
-						"buffer_size": 1406,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								471,
-								471
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/ColdFusion/HTML+CFML.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "samples/list_tables.cfm",
-					"settings":
-					{
-						"buffer_size": 673,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								279,
-								319
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/ColdFusion/HTML+CFML.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "samples/put_item.cfm",
-					"settings":
-					{
-						"buffer_size": 1638,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								838,
-								838
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/ColdFusion/HTML+CFML.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "WEB-INF/web.xml",
-					"settings":
-					{
-						"buffer_size": 26453,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								20319,
-								20319
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/XML/XML.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 6737.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "adamtest.cfm",
-					"settings":
-					{
-						"buffer_size": 2434,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2142,
-								2129
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/ColdFusion/HTML+CFML.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 760.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

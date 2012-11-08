@@ -4,3 +4,4 @@ quickie.cfm
 .project
 /aws_credentials.xml
 /WEB-INF
+*.sublime-workspace
