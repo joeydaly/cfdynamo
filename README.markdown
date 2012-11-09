@@ -15,9 +15,12 @@ Skip this section if you already have Tomcat running and you're happy with your 
 
 1. Download the latest [Apache Tomcat](http://tomcat.apache.org/download-70.cgi) - choose the Core zip file.
 1. Unpack the contents of the zip file anywhere you like to run Tomcat from.
-1. Set some environment variables for Tomcat that help ColdFusion run well.  One approach to this is to create a *setenv.sh* file in the tomcat/bin folder. Here is a sample set of commands you could use that work well with Adobe ColdFusion or Railo:
-```
-# Nothing to set at this time.
+1. Set some environment variables for Tomcat that help ColdFusion run well.  One approach to this is to create a *setenv.sh* file in the tomcat/bin folder. Immediately below is a sample set of commands you could use that work well with Adobe ColdFusion or Railo.
+1. Start Tomcat by executing the startup.sh or startup.bat (depending on platform)
+1. Make sure it's up and running by [browsing to the local host](http://127.0.0.1:8080).
+
+#### Sample setenv.sh / setenv.bat Commands ####
+<pre><code>
 export CATALINA_OPTS="$CATALINA_OPTS -Xms2048m"
 export CATALINA_OPTS="$CATALINA_OPTS -Xmx2048m"
 export CATALINA_OPTS="$CATALINA_OPTS -Xss256k"
@@ -29,9 +32,7 @@ do
     echo ">> " $arg
 done
 echo ""
-```
-1. Start Tomcat by executing the startup.sh or startup.bat (depending on platform)
-1. Make sure it's up and running by [browsing to the local host](http://127.0.0.1:8080).
+</code></pre>
 
 ### Get & Install CFML Engine ###
 Skip this section if you already have your favorite CFML engine installed and happily responding to requests in your J2EE container! :)
@@ -43,7 +44,8 @@ We're not going to cover which flavor you use here, the following instructions s
 1. Stop Tomcat if it's currently running.
 1. Modify your operating system's *HOSTS* file, adding the line <pre>
 127.0.0.1	cfdynamo.local</pre>
-1. Modify Tomcat's *server.xml* file, which is located in the tomcat/conf folder.  Add the following *Host* entry:
+1. Modify Tomcat's *server.xml* file, which is located in the <code>tomcat/conf</code> folder.  Add the following *Host* entry:
+<pre><code>
 ```xml
 <Host name="cfdynamo.local" appBase="webapps" unpackWARs="false" autodeploy="true">
 		<Alias>cfdynamo.local</Alias>
@@ -51,6 +53,7 @@ We're not going to cover which flavor you use here, the following instructions s
 		<Context path="" docBase="/path/to/where/you/unpacked/CFML/engine" />
 </Host>
 ```
+</code></pre>
 
 1. Download/expand the Zip archive from Github.
 1. Rename the downloaded folder to *cfdynamo*
