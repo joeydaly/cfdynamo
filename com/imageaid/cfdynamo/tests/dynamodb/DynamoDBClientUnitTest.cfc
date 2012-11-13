@@ -605,6 +605,27 @@ component
 	}
 
 
+	public Void function initWithCredentialsShouldSuccessfullyInit() {
+		// Setup an argument collection
+		var stArgs = {};
+		stArgs["awsKey"] = "someKey";
+		stArgs["awsSecret"] = "someSecret";
+
+		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
+		// and basically setup the very table information we asked it to set in the first place.
+		var oAWSMock = variables.mockBox.createStub();
+		oAWSMock.$("init", createObject("java","com.amazonaws.services.dynamodb.AmazonDynamoDBClient"));
+		CUT.setAwsDynamoDBClient(oAWSMock);
+
+		// Perform the initialization
+		var newCUT = CUT.init(argumentcollection=stArgs);
+
+		// Analyze the type of object the internally set AWS DynamoDBClient has become
+		var stDDB = getMetaData(CUT.getAwsDynamoDBClient());
+		assertEquals("com.amazonaws.services.dynamodb.AmazonDynamoDBClient", stDDB.name, "The type reported from the CUT's awsDynamoDBClient is #stDDB.name#, as opposed to the expected: com.amazonaws.services.dynamodb.AmazonDynamoDBClient.");
+	}
+
+
 
 
 	/**																						**/

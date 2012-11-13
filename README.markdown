@@ -40,48 +40,56 @@ Skip this section if you already have your favorite CFML engine installed and ha
 We're not going to cover which flavor you use here, the following instructions should be generic enough to work on Railo, Adobe ColdFusion, etc.  The following directions cover the J2EE installation of the CFML engine. If you choose to use the stand-alone installation options for those products you are on your own to adapt these instructions.
 
 1. Obtain the J2EE Web Archive (.WAR file) that contains your CFML engine.
-1. Unpack the WAR file into its directory structures in a place you want to develop and/or test in.
+1. Unpack the WAR file into its directory structures in a place you want to develop and/or test in. Whatever folder this happens to be, that's the path that will be used below in the example XML for "/path/to/where/you/will/unpack/CFML/engine"
 1. Stop Tomcat if it's currently running.
-1. Modify your operating system's *HOSTS* file, adding the line <pre>
-127.0.0.1	cfdynamo.local</pre>
+1. Modify your operating system's *HOSTS* file, adding the following line so we can refer to the standalone cfdynamo site
+
+	127.0.0.1	cfdynamo.local
+
 1. Modify Tomcat's *server.xml* file, which is located in the <code>tomcat/conf</code> folder.  Add the following *Host* entry:
-<pre><code>
-```xml
-<Host name="cfdynamo.local" appBase="webapps" unpackWARs="false" autodeploy="true">
+
+	<Host name="cfdynamo.local" appBase="webapps" unpackWARs="false" autodeploy="true">
 		<Alias>cfdynamo.local</Alias>
 		<Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs" prefix="cfdynamo_access" suffix=".log" />
-		<Context path="" docBase="/path/to/where/you/unpacked/CFML/engine" />
-</Host>
-```
-</code></pre>
+		<Context path="" docBase="/path/to/where/you/will/unpack/CFML/engine" />
+	</Host>
 
-1. Download/expand the Zip archive from Github.
-1. Rename the downloaded folder to *cfdynamo*
-1. Add the *cfdynamo* folder and its contents to your web application or web root (you can remove the samples and other files, not in the com folder, if you like)
+1. Start Tomcat. Watch the catalina.out log to make sure no errors are thrown during startup.
+
+
+### Download and install the AWS Java SDK ###
+The cfdynamo connector library makes use of Amazon's Java SDK.  It's essentially a wrapper for it.  However, the SDK is not a part of this project.
+Therefore, as a separate step make sure you've obtained and installed the SDK into your web application's class path.  There are two places you can
+put it.  One place would be where all applications deployed in the Tomcat container can see it.  The other is in the application itself, which is
+preferred (and outlined in the following steps) only for it's specificity.
+
 1. Download the latest version of the [AWS Java SDK](http://aws.amazon.com/sdkforjava/)
-1. Expand the AWS Java SDK and find the main JAR file (e.g. "aws-java-sdk-1.3.22.jar" - version numbers could be different if I'm talking to a person in the future)
-1. Copy or move the AWS SDK JAR to your web application's WEB-INF/lib folder, which should already be in Tomcat's JVM classpath. NOTE: If you want to make the lib available to all the applications in your container, place it in the Tomcat-ROOT/lib folder.
+1. Expand the AWS Java SDK zip archive and find the main JAR file (e.g. "aws-java-sdk-1.3.22.jar" - version numbers could be different if I'm talking to a person in the future)
+1. Copy or move the AWS SDK JAR to your web application's WEB-INF/lib folder, which should already be in Tomcat's JVM class path. NOTE: If you want to make the lib available to all the applications in your container, place it in the Tomcat-ROOT/lib folder.
 1. Restart Tomcat, which will pull in the AWS SDK.
+
+
+### Setup the cfdynamo library ###
+Follow these steps to get the library working and the tests functional.  You can start your efforts here if
+you already have a running CFML engine and a webroot to drop cfdynamo into.
+
+1. Expand the cfdynamo zip archive from Github into the docBase noted above, or wherever you prefer to drop this library in.
+1. Point your web browser to http://cfdynamo.local:8080/ (assuming Tomcat is setup to run on the default port 8080) and you should see a short list of choices, including running the tests or viewing the samples.
+
+
+### Configure Credentials ###
+Amazon Web Services doesn't just let any Joe off the street access DynamoDB!  You need to provide your account credentials.
+Note that this is not a very secure place to put this XML file.  Feel free to change where it lives.  The important part
+is that the values are passed to the DynamoDBClient.cfc's init method.  How the credentials are stored and where is your choice.
+One approach, which is far more protected, is to make them Java system properties.
+1. Rename /aws_credentials_template.xml to /aws_credentials.xml
+1. Enter your access key
+1. Enter your secret key
+1. Save the file
+
+*You're setup and ready to go!*
   
 
-If you use Adobe ColdFusion 9, the general idea is the same but here is how I configured ACF9 (stand-alone server) to load my AWS JARs: 
-
-1. Download/expand the Zip archive from Github.
-2. Rename the downloaded folder to cfdynamo
-3. Inside the assets folder is a Zip archive containing the AWS and related JARs ... expand this archive (the expanded archive will be named "aws")
-4. Move the newly expanded "aws" folder^ into your {Adobe ColdFusion 9 Install Folder}/WEB-INF/lib folder.
-5. Open {Adobe ColdFusion 9 Install Folder}/runtime/bin/jvm.config and find the line with "java.class.path=" (there may be a better way to do this but this is how I got it working with the lest amount of headaches)
-6. Add the following to the end of the java.class.path= line: ,{application.home}/../wwwroot/WEB-INF/lib/aws
-7. Add the "cfdynamo" folder and its content to your web application (you can remove the examples and other files if you like)
-8. Add a mapping to "cfdynamo" in your web administrator ... the sample app attemtps to create a /cfdynamo mapping for you, but, if you're going to use this in an application, it's probably best to just add the mapping the the administrator.
-9. Retart ACF 9
-
-### Sample App ###
-Other than the assets folder in this Git repository, which you need to address with the steps above, you can clone the files into a directory in your web root and just get going. Sort of ... you still have to create a table in the AWS console (going to add the createTable wrapper shortly).
-
-^The "aws" folder contains a series of JARs. These JARs can be dropped directly into your {tomcat root}/lib or {Adobe ColdFusion 9 Install Folder}/wwwroot/WEB-INF/lib/ folder with no updates to the catalina.properties file. 
-
-However, I prefer to keep my added JARs organized into their own folders for easier updates, etc. Hence, the use of the "aws" folder to hold all of these JARs.
-
-### Details to Come ###
-More details to come on the project ... just getting the initial repo setup today. 
+## Sample Application & Code ##
+To help you get started there is a sample application and code in the /samples/index.cfm part of the application.  Hopefully this will get you started on the right foot quickly with the
+cfdynamo connector library.
