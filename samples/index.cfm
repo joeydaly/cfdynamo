@@ -2,7 +2,8 @@
 	<head>
 		<title>CFDynamo Project</title>
 		<link rel="stylesheet" href="css/bootstrap.min.css" />
-		<script type="text/javascript" src="js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/jquery-1.8.2.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap.js"></script>
 		<script type="text/javascript" src="js/samples.js"></script>
 	</head>
 	<body>
@@ -29,7 +30,7 @@
 						<li><a href="##" id="batchDeleteItems">Batch Delete Items</a></li>
 					</ul>
 				</div>
-				<div class="span9">
+				<div id="content" class="span9">
 					<p>
 						Here are some <em>very</em> basic tools to use to test drive this DynamoDB connector out.
 						Be forewarned!  There may not be any validation on here whatsoever, so don't hold us responsible
