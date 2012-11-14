@@ -20,10 +20,8 @@
 						<li><a href="##" id="listTables">List Tables</a></li>
 						<li><a href="##" id="createTable">Create Table</a></li>
 						<li><a href="##" id="updateTable">Update Table</a></li>
-						<li><a href="##" id="deleteTable">Delete Table</a></li>
 						<li><a href="##" id="putItem">Put Item</a></li>
 						<li><a href="##" id="getItem">Get Item</a></li>
-						<li><a href="##" id="deleteItem">Delete Item</a></li>
 						<li><a href="##" id="queryTable">Query Table</a></li>
 						<li><a href="##" id="scanTable">Scan Table</a></li>
 						<li><a href="##" id="batchPutItems">Batch Put Items</a></li>
@@ -31,6 +29,7 @@
 					</ul>
 				</div>
 				<div id="content" class="span9">
+					<h2>Important!</h2>
 					<p>
 						Here are some <em>very</em> basic tools to use to test drive this DynamoDB connector out.
 						Be forewarned!  There may not be any validation on here whatsoever, so don't hold us responsible
