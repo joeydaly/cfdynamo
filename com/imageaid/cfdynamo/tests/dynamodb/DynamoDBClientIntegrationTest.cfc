@@ -157,6 +157,215 @@
 	}
 
 
+	public void function updateTableShouldOverwriteSpecifiedTableAttributes() {
+		// Setup arg collection
+		var stArgs = {};
+		stArgs["tableName"] = "cfdynamo-integrationtest-updateTable-#hour(now())#-#minute(now())#-#getTickCount()#";
+		stArgs["readCapacity"] = 8;
+		stArgs["writeCapacity"] = 6;
+		// First we need to create the table.  Afterwards we will update it and make assertions
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
+		// Now engage a while loop because we need to wait until the status of the table is ACTIVE to perform the update
+		do {
+			sleep(1000);
+		} while (CUT.getTableInformation(stTableDescription.tableName).status != "ACTIVE");
+		// If we made it here past the while loop, we're ready to update the table. Modify our read and write capacity
+		stArgs["readCapacity"] = 6;
+		stArgs["writeCapacity"] = 4;
+		var blnSuccess = CUT.updateTable(argumentcollection=stArgs);
+		// Make sure we received a true
+		assertTrue(blnSuccess, "The response from the updateTable method was not true, and should have been.");
+		// Also make sure that the table now has those new properties.  We will need another while loop because the table
+		// will have entered an UPDATING status as it re-provisions the capacity.
+		do {
+			sleep(330);
+		} while (CUT.getTableInformation(stTableDescription.tableName).status != "ACTIVE");
+		// Ok, get the table information so we can make assertions
+		var stUpdatedTableDescription = CUT.getTableInformation(stTableDescription.tableName);
+		assertEquals(stArgs["readCapacity"], stUpdatedTableDescription.readCapacity, "The read capacity reported from the service is not the new updated value.");
+		assertEquals(stArgs["writeCapacity"], stUpdatedTableDescription.writeCapacity, "The write capacity reported from the service is not the new updated value.");
+	}
+
+
+	public void function listTablesShouldReturnArrayOfTableNamesWhenThereAreTables() {
+		// Setup some args for the createTable we need to fire off
+		var stArgs = {};
+		stArgs["tableName"] = "cfdynamo-integrationtest-listTables-#hour(now())#-#minute(now())#-#getTickCount()#";
+		stArgs["readCapacity"] = 8;
+		stArgs["writeCapacity"] = 6;
+		// Create the table.
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
+		// Nice thing about freshly created table is that even while the AWS is spinning them
+		// up, they will appear in the list. We won't have to engage a sleep loop to wait for it.
+		var aTables = CUT.listTables();
+		assertIsArray(aTables, "The returned value is supposed to be an array.");
+		assertTrue(arrayContains(aTables, stArgs["tableName"]), "The returned list should contain the name of the table we just created.");
+	}
+
+
+	public void function deleteTableShouldChangeStatusOfActiveTableToDeleting() {
+		// Setup some args for the createTable we need to fire off
+		var stArgs = {};
+		stArgs["tableName"] = "cfdynamo-integrationtest-listTables-#hour(now())#-#minute(now())#-#getTickCount()#";
+		stArgs["readCapacity"] = 8;
+		stArgs["writeCapacity"] = 6;
+		// Create the table.
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Wait for it to become active
+		do {
+			sleep(1000);
+		} while (CUT.getTableInformation(stTableDescription.tableName).status != "ACTIVE");
+		// Fire off the deletion command
+		CUT.deleteTable(stTableDescription.tableName);
+		// Assert the status.
+		assertEquals("DELETING", CUT.getTableInformation(stTableDescription.tableName).status);
+	}
+
+
+	public void function putItemShouldAddNewItemIntoSpecifiedTable() {
+		// To keep the test atomic and encapsulated, we need a table to put something into
+		// Setup some args for the createTable we need to fire off
+		var stArgs = {};
+		stArgs["tableName"] = "cfdynamo-integrationtest-putItem-#hour(now())#-#minute(now())#-#getTickCount()#";
+		stArgs["readCapacity"] = 5;
+		stArgs["writeCapacity"] = 2;
+		// Create the table.
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
+		// Wait for it to become active
+		do {
+			sleep(1000);
+		} while (CUT.getTableInformation(stTableDescription.tableName).status != "ACTIVE");
+		// Now we have a table. Let's put something in it.
+		var oSample = {"id":1000, "Name":"crackerbarrel", "payload":["foo","bar","knee","toes"], "likeChocolate":"false","cows":93};
+		var stReplacedItem = CUT.putItem(tableName=stTableDescription.tableName, item=oSample);
+		// The struct that was returned should be empty because the connector lib was designed to only report back overwrites
+		assertIsEmptyStruct(stReplacedItem, "Because this insert is a new record, the returned struct should be empty.");
+	}
+
+
+	public void function putItemShouldReturnOldValuesThatWereOverWritten() {
+		// To keep the test atomic and encapsulated, we need a table to put something into
+		// Setup some args for the createTable we need to fire off
+		var stArgs = {};
+		stArgs["tableName"] = "cfdynamo-integrationtest-putItemReplace-#hour(now())#-#minute(now())#-#getTickCount()#";
+		stArgs["readCapacity"] = 5;
+		stArgs["writeCapacity"] = 2;
+		stArgs["hashKeyName"] = "replaceTestHashKey";
+		stArgs["hashKeyType"] = "Numeric";
+		// Create the table.
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
+		// Wait for it to become active
+		do {
+			sleep(1000);
+		} while (CUT.getTableInformation(stTableDescription.tableName).status != "ACTIVE");
+		// Now we have a table. Let's put something in it.
+		var oSampleStart = {"replaceTestHashKey":1000, "Name":"crackerbarrel", "payload":["foo","bar","knee","toes"], "likeChocolate":"false","cows":93};
+		CUT.putItem(tableName=stTableDescription.tableName, item=oSampleStart);
+		// Create a similar item with something changed so we can overwrite the field value. Note the same hashKey value is used.
+		var oSampleEnd = {"replaceTestHashKey":1000, "Name":"mister mistofoles", "payload":["foo","bar","knee","toes"], "likeChocolate":"false","cows":93};
+		// Replace the item
+		var stReplacedValues = CUT.putItem(tableName=stTableDescription.tableName, item=oSampleEnd);
+		// The struct that was returned should contain a key for "Name" because that's what was changed.
+		assertTrue(structKeyExists(stReplacedValues, "Name"), "The field 'Name' should have returned because its value was changed.");
+		assertTrue((oSampleStart.Name eq stReplacedValues.Name), "The value returned for the 'Name' field should equal the original value that was inserted.");
+	}
+
+
+	public void function getItemShouldReturnRequestedItem() {
+		// To keep the test atomic and encapsulated, we need a table to put something into
+		// Setup some args for the createTable we need to fire off
+		var stArgs = {};
+		stArgs["tableName"] = "cfdynamo-integrationtest-getItem-#hour(now())#-#minute(now())#-#getTickCount()#";
+		stArgs["readCapacity"] = 5;
+		stArgs["writeCapacity"] = 2;
+		// Create the table.
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
+		// Wait for it to become active
+		do {
+			sleep(1000);
+		} while (CUT.getTableInformation(stTableDescription.tableName).status != "ACTIVE");
+		// Now we have a table. Let's put something in it.
+		var oSample = {"id":1000, "Name":"crackerbarrel", "payload":["bar","foo","knee","toes"], "likeChocolate":"false","cows":93};
+		CUT.putItem(tableName=stTableDescription.tableName, item=oSample);
+		// And finally, get it back out to inspect it and make assertions
+		var oReturnedItem = CUT.getItem(tableName=stTableDescription.tableName, hashKey=1000);
+		assertEquals(oSample, oReturnedItem, "The record that came out should look like the record that went in.");
+	}
+
+
+	public void function deleteItemShouldReturnDeletedRecord() {
+		// To keep the test atomic and encapsulated, we need a table to put something into
+		// Setup some args for the createTable we need to fire off
+		var stArgs = {};
+		stArgs["tableName"] = "cfdynamo-integrationtest-getDeletedItem-#hour(now())#-#minute(now())#-#getTickCount()#";
+		stArgs["readCapacity"] = 5;
+		stArgs["writeCapacity"] = 2;
+		// Create the table.
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
+		// Wait for it to become active
+		do {
+			sleep(1000);
+		} while (CUT.getTableInformation(stTableDescription.tableName).status != "ACTIVE");
+		// Now we have a table. Let's put something in it.
+		var oSample = {"id":1000, "Name":"crackerbarrel", "payload":["bar","foo","knee","toes"], "likeChocolate":"false","cows":93};
+		CUT.putItem(tableName=stTableDescription.tableName, item=oSample);
+		// Now let's delete the item
+		var oDeletedItem = CUT.deleteItem(tableName=stTableDescription.tableName, hashKey=1000);
+		// Assert that the deleted item that is returned looks just like what we put in
+		assertEquals(oSample, oDeletedItem, "The returned deleted item should look just like the item we inserted.");
+	}
+
+
+	/**
+	 * @mxunit:expectedException "API.AWS.DynamoDB.RecordNotFound"
+	 **/
+	public void function itemShouldNotBeFoundAfterDeletion() {
+		// To keep the test atomic and encapsulated, we need a table to put something into
+		// Setup some args for the createTable we need to fire off
+		var stArgs = {};
+		stArgs["tableName"] = "cfdynamo-integrationtest-getImpossibleItem-#hour(now())#-#minute(now())#-#getTickCount()#";
+		stArgs["readCapacity"] = 5;
+		stArgs["writeCapacity"] = 2;
+		// Create the table.
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
+		// Wait for it to become active
+		do {
+			sleep(1000);
+		} while (CUT.getTableInformation(stTableDescription.tableName).status != "ACTIVE");
+		// Now we have a table. Let's put something in it.
+		var oSample = {"id":1000, "Name":"crackerbarrel", "payload":["foo","bar","knee","toes"], "likeChocolate":"false","cows":93};
+		CUT.putItem(tableName=stTableDescription.tableName, item=oSample);
+		// Now let's delete the item
+		var oDeletedItem = CUT.deleteItem(tableName=stTableDescription.tableName, hashKey=1000);
+		// Now perform the operation that should trigger the exception we're expecting
+		var oImpossibleItem = CUT.getItem(tableName=stTableDescription.tableName, hashKey=1000);
+	}
+
+
+	public void function batchPutItemsShouldInsertAllSentItemsIntoTable() {
+		fail("Test not implemented.");
+	}
+
+
+	public void function batchDeleteItemsShouldRemoveAllSpecifiedItemsFromTable() {
+		fail("Test not implemented.");
+	}
+
+
 
 	/** Private helper methods, these are not tests **/
 
@@ -210,31 +419,6 @@
 		}
 		writeLog(type="information", file="integrationtests", text="Closing integration tests for #this.name# at #now()#.");
 	}
-/*
-	public void function test_list_tables(){
-		assertFalse(true,"Dang, list tables should be false.");
-	}
-
-	public void function test_create_table(){
-		assertFalse(true,"Dang, create tavle also be false.");
-	}
-
-	public void function test_delete_table(){
-		assertFalse(true,"Dang, delete table should be false.");
-	}
-
-	public void function test_put_item(){
-		assertFalse(true,"Dang, put item should be false.");
-	}
-
-	public void function test_get_item(){
-		assertFalse(true,"Dang, get item should be false.");
-	}
-
-	public void function test_update_table(){
-		assertFalse(true,"Dang, update table should be false.");
-	}
-*/
 
 
 

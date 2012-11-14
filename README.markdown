@@ -99,3 +99,7 @@ cfdynamo connector library.
 The included unit and integration tests use MXUnit, and so that library is included in this project. The tests
 will log to unittests.log and integrationtests.log.  Keep an eye on those with a following tail to monitor their
 progress, particularly with the integration tests.
+
+Another important note: AWS takes a good 30-60 seconds to respond to table operations (create, update, delete).
+The tests have been designed to enter sleep-loops to wait for the expected status.  This can easily surpass the
+3 minute mark, so increase your CFML engine's timeouts to accomodate the tests. 
