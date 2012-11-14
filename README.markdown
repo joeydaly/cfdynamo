@@ -93,3 +93,9 @@ One approach, which is far more protected, is to make them Java system propertie
 ## Sample Application & Code ##
 To help you get started there is a sample application and code in the /samples/index.cfm part of the application.  Hopefully this will get you started on the right foot quickly with the
 cfdynamo connector library.
+
+
+## Tests ##
+The included unit and integration tests use MXUnit, and so that library is included in this project. The tests
+will log to unittests.log and integrationtests.log.  Keep an eye on those with a following tail to monitor their
+progress, particularly with the integration tests.
