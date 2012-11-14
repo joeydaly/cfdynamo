@@ -11,13 +11,6 @@
 				<div class="span12">
 					<h1>CFDYNAMO</h1>
 					<h2>You're running the CFDynamo Amazon AWS DynamoDB connector sample application.</h2>
-					<p>
-						Thanks for trying it out!  Here's a dump of your instance in the applicatin scope
-						that you can start using at any time, assuming you've filling in your AWS credentials.
-					</p>
-<!---
-					<cfdump var="#application.aws.cfdynamo#" expand="false" label="cfdynamo connector lib" />
- --->
 					<ul>
 						<li><a href="samples/">Samples</a></li>
 						<li>
