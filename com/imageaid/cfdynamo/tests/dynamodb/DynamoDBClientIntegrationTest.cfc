@@ -17,7 +17,7 @@
 	public void function beforeTests() {
 		// Start tracking all tables that are created so we can delete them when we're done.
 		variables.tablesCreated = [];
-		writeLog(type="information", file="integrationtests", text="Starting unit tests for #this.name# at #now()#.");
+		writeLog(type="information", file="integrationtests", text="Starting integration tests for #this.name# at #now()#.");
 	}
 
 
@@ -208,7 +208,7 @@
 				}
 			}
 		}
-		writeLog(type="information", file="integrationtests", text="Closing unit tests for #this.name# at #now()#.");
+		writeLog(type="information", file="integrationtests", text="Closing integration tests for #this.name# at #now()#.");
 	}
 /*
 	public void function test_list_tables(){
