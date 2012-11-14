@@ -165,6 +165,8 @@
 		stArgs["writeCapacity"] = 6;
 		// First we need to create the table.  Afterwards we will update it and make assertions
 		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 		// Now engage a while loop because we need to wait until the status of the table is ACTIVE to perform the update
 		do {
 			sleep(1000);
@@ -184,8 +186,6 @@
 		var stUpdatedTableDescription = CUT.getTableInformation(stTableDescription.tableName);
 		assertEquals(stArgs["readCapacity"], stUpdatedTableDescription.readCapacity, "The read capacity reported from the service is not the new updated value.");
 		assertEquals(stArgs["writeCapacity"], stUpdatedTableDescription.writeCapacity, "The write capacity reported from the service is not the new updated value.");
-		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 	}
 
 
@@ -197,6 +197,8 @@
 		stArgs["writeCapacity"] = 6;
 		// Create the table.
 		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 		// Nice thing about freshly created table is that even while the AWS is spinning them
 		// up, they will appear in the list. We won't have to engage a sleep loop to wait for it.
 		var aTables = CUT.listTables();
@@ -233,6 +235,8 @@
 		stArgs["writeCapacity"] = 2;
 		// Create the table.
 		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 		// Wait for it to become active
 		do {
 			sleep(1000);
@@ -242,8 +246,6 @@
 		var stReplacedItem = CUT.putItem(tableName=stTableDescription.tableName, item=oSample);
 		// The struct that was returned should be empty because the connector lib was designed to only report back overwrites
 		assertIsEmptyStruct(stReplacedItem, "Because this insert is a new record, the returned struct should be empty.");
-		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 	}
 
 
@@ -258,6 +260,8 @@
 		stArgs["hashKeyType"] = "Numeric";
 		// Create the table.
 		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 		// Wait for it to become active
 		do {
 			sleep(1000);
@@ -272,8 +276,6 @@
 		// The struct that was returned should contain a key for "Name" because that's what was changed.
 		assertTrue(structKeyExists(stReplacedValues, "Name"), "The field 'Name' should have returned because its value was changed.");
 		assertTrue((oSampleStart.Name eq stReplacedValues.Name), "The value returned for the 'Name' field should equal the original value that was inserted.");
-		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 	}
 
 
@@ -286,6 +288,8 @@
 		stArgs["writeCapacity"] = 2;
 		// Create the table.
 		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 		// Wait for it to become active
 		do {
 			sleep(1000);
@@ -296,8 +300,6 @@
 		// And finally, get it back out to inspect it and make assertions
 		var oReturnedItem = CUT.getItem(tableName=stTableDescription.tableName, hashKey=1000);
 		assertEquals(oSample, oReturnedItem, "The record that came out should look like the record that went in.");
-		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 	}
 
 
@@ -310,6 +312,8 @@
 		stArgs["writeCapacity"] = 2;
 		// Create the table.
 		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 		// Wait for it to become active
 		do {
 			sleep(1000);
@@ -321,8 +325,6 @@
 		var oDeletedItem = CUT.deleteItem(tableName=stTableDescription.tableName, hashKey=1000);
 		// Assert that the deleted item that is returned looks just like what we put in
 		assertEquals(oSample, oDeletedItem, "The returned deleted item should look just like the item we inserted.");
-		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 	}
 
 
@@ -338,6 +340,8 @@
 		stArgs["writeCapacity"] = 2;
 		// Create the table.
 		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 		// Wait for it to become active
 		do {
 			sleep(1000);
@@ -347,9 +351,6 @@
 		CUT.putItem(tableName=stTableDescription.tableName, item=oSample);
 		// Now let's delete the item
 		var oDeletedItem = CUT.deleteItem(tableName=stTableDescription.tableName, hashKey=1000);
-		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		// NOTE: We do this now before the exception is thrown!
-		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 		// Now perform the operation that should trigger the exception we're expecting
 		var oImpossibleItem = CUT.getItem(tableName=stTableDescription.tableName, hashKey=1000);
 	}
