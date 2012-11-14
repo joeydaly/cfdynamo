@@ -17,7 +17,7 @@
 	public void function beforeTests() {
 		// Start tracking all tables that are created so we can delete them when we're done.
 		variables.tablesCreated = [];
-		writeLog(type="information", file="unittests", text="Starting unit tests for #this.name# at #now()#.");
+		writeLog(type="information", file="integrationtests", text="Starting unit tests for #this.name# at #now()#.");
 	}
 
 
@@ -48,19 +48,21 @@
 	 **/
 	public void function createTableWithJustUniqueNameShouldCreateTable() {
 		// Let's create a guaranteed unique tablename
-		var sTableName = "cfdynamo-unit-tests-" & createUUID();
-		var awsTableDescription = CUT.createTable(tableName=sTableName);
-		writeLog(type="information", file="unittests", text="TEST createTableWithJustUniqueNameShouldCreateTable generated this table: #awsTableDescription.toString()#");
+		var sTableName = "cfdynamo-integration-tests-" & createUUID();
+		var stTableDescription = CUT.createTable(tableName=sTableName);
+		writeLog(type="information", file="integrationtests", text="TEST createTableWithJustUniqueNameShouldCreateTable generated this table: #stTableDescription.toString()#");
 		assertFalse(isDefined("result"));
 		// Make sure we found our table in the list of tables
-		assertEquals(sTableName, awsTableDescription.getTableName(), "The resulting table description instance should be reporing a table name of '#sTableName#' but is instead reporting '#awsTableDescription.getTableName()#'.");
+		assertEquals(sTableName, stTableDescription.tableName, "The resulting table description instance should be reporing a table name of '#sTableName#' but is instead reporting '#stTableDescription.tableName#'.");
 		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, sTableName);
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 	}
 
 
+	/**
+	 * @mxunit:expectedException "com.amazonaws.AmazonServiceException"
+	 **/
 	public void function createTableWithEmptyNameShouldThrowException()
-		mxunit:expectedException="com.amazonaws.AmazonServiceException"
 	{
 		var result = CUT.createTable(tableName="");
 	}
@@ -69,97 +71,89 @@
 	public void function createTableShouldAssignReadWriteThroughput() {
 		// Setup an argument collection
 		var stArgs = {};
-		stArgs["tableName"] = "cfdynamo-unit-tests-" & createUUID();
+		stArgs["tableName"] = "cfdynamo-integration-tests-" & createUUID();
 		stArgs["readCapacity"] = 7;
 		stArgs["writeCapacity"] = 3;
 		// Create our table with custom read/write provisioning that is NOT the default values
-		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
-		writeLog(type="information", file="unittests", text="TEST createTableShouldAssignReadWriteThroughput generated this table: #awsTableDescription.toString()#");
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		writeLog(type="information", file="integrationtests", text="TEST createTableShouldAssignReadWriteThroughput generated this table: #stTableDescription.toString()#");
 		// Assert that our returned values from the serice report true
-		assertEquals(awsTableDescription.getProvisionedThroughput().getReadCapacityUnits(), stArgs["readCapacity"], "The specified read capacity of #stArgs['readCapacity']# doesn't match the read capacity returned from the service's table description.");
-		assertEquals(awsTableDescription.getProvisionedThroughput().getWriteCapacityUnits(), stArgs["writeCapacity"], "The specified write capacity of #stArgs['writeCapacity']# doesn't match the write capacity returned from the service's table description.");
+		assertEquals(stArgs["readCapacity"], stTableDescription.readCapacity, "The specified read capacity of #stArgs['readCapacity']# doesn't match the read capacity returned from the service's table description.");
+		assertEquals(stArgs["writeCapacity"], stTableDescription.writeCapacity, "The specified write capacity of #stArgs['writeCapacity']# doesn't match the write capacity returned from the service's table description.");
 		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stArgs["tableName"]);
+		arrayAppend(variables.tablesCreated, stTableDescription["tableName"]);
 	}
 
 
 	public void function tableShouldBeCreatedWithSpecifiedStringHashKey() {
 		// Setup an argument collection
 		var stArgs = {};
-		stArgs["tableName"] = "cfdynamo-unit-tests-" & createUUID();
+		stArgs["tableName"] = "cfdynamo-integration-tests-" & createUUID();
 		stArgs["hashKeyName"] = "myTestHashKeyName";
 		stArgs["hashKeyType"] = "String";
 		// Create our table with custom read/write provisioning that is NOT the default values
-		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
-		writeLog(type="information", file="unittests", text="TEST tableShouldBeCreatedWithSpecifiedStringHashKey generated this table: #awsTableDescription.toString()#");
-		// Pull the KeySchema out of the TableDescription
-		var awsKeySchema = awsTableDescription.getKeySchema();
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		writeLog(type="information", file="integrationtests", text="TEST tableShouldBeCreatedWithSpecifiedStringHashKey generated this table: #stTableDescription.toString()#");
 		// Take a look at the name of the hashKey, assert that it is what we specified above
-		assertEquals(stArgs["hashKeyName"], awsKeySchema.getHashKeyElement().getAttributeName());
+		assertEquals(stArgs["hashKeyName"], stTableDescription.keys.hashKey.name, "The returned name of the hash key is not what was assigned during table creation.");
 		// Now assert that it is of the same data type we specified
-		assertEquals(stArgs["hashKeyType"], awsAttributeValueTypeToCFMLType(awsKeySchema.getHashKeyElement().getAttributeType()));
+		assertEquals(stArgs["hashKeyType"], stTableDescription.keys.hashKey.type, "The returned type of the kash key is not what was assigned during table creation.");
 		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stArgs["tableName"]);
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 	}
 
 
 	public void function tableShouldBeCreatedWithSpecifiedNumericHashKey() {
 		// Setup an argument collection
 		var stArgs = {};
-		stArgs["tableName"] = "cfdynamo-unit-tests-" & createUUID();
+		stArgs["tableName"] = "cfdynamo-integration-tests-" & createUUID();
 		stArgs["hashKeyName"] = "myTestHashKeyName";
 		stArgs["hashKeyType"] = "Numeric";
 		// Create our table with custom read/write provisioning that is NOT the default values
-		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
-		writeLog(type="information", file="unittests", text="TEST tableShouldBeCreatedWithSpecifiedNumericHashKey generated this table: #awsTableDescription.toString()#");
-		// Pull the KeySchema out of the TableDescription
-		var awsKeySchema = awsTableDescription.getKeySchema();
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		writeLog(type="information", file="integrationtests", text="TEST tableShouldBeCreatedWithSpecifiedNumericHashKey generated this table: #stTableDescription.toString()#");
 		// Take a look at the name of the hashKey, assert that it is what we specified above
-		assertEquals(stArgs["hashKeyName"], awsKeySchema.getHashKeyElement().getAttributeName());
+		assertEquals(stArgs["hashKeyName"], stTableDescription.keys.hashKey.name, "The returned hashKey name was not set to the value it was assigned.");
 		// Now assert that it is of the same data type we specified
-		assertEquals(stArgs["hashKeyType"], awsAttributeValueTypeToCFMLType(awsKeySchema.getHashKeyElement().getAttributeType()));
+		assertEquals(stArgs["hashKeyType"], stTableDescription.keys.hashKey.type, "The returned hashKey type was not set to the type assigned.");
 		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stArgs["tableName"]);
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 	}
 
 
 	public void function tableShouldBeCreatedWithSpecifiedStringRangeKey() {
 		// Setup an argument collection
 		var stArgs = {};
-		stArgs["tableName"] = "cfdynamo-unit-tests-" & createUUID();
+		stArgs["tableName"] = "cfdynamo-integration-tests-" & createUUID();
 		stArgs["rangeKeyName"] = "myTestHashKeyName";
 		stArgs["rangeKeyType"] = "String";
 		// Create our table with custom read/write provisioning that is NOT the default values
-		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
-		writeLog(type="information", file="unittests", text="TEST tableShouldBeCreatedWithSpecifiedStringRangeKey generated this table: #awsTableDescription.toString()#");
-		// Pull the KeySchema out of the TableDescription
-		var awsKeySchema = awsTableDescription.getKeySchema();
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		writeLog(type="information", file="integrationtests", text="TEST tableShouldBeCreatedWithSpecifiedStringRangeKey generated this table: #stTableDescription.toString()#");
 		// Take a look at the name of the rangeKey, assert that it is what we specified above
-		assertEquals(stArgs["rangeKeyName"], awsKeySchema.getRangeKeyElement().getAttributeName());
+		assertEquals(stArgs["rangeKeyName"], stTableDescription.keys.rangeKey.name, "The returned name of the range key is not what was assigned during table creation.");
 		// Now assert that it is of the same data type we specified
-		assertEquals(stArgs["rangeKeyType"], awsAttributeValueTypeToCFMLType(awsKeySchema.getRangeKeyElement().getAttributeType()));
+		assertEquals(stArgs["rangeKeyType"], stTableDescription.keys.rangeKey.type, "The returned type of the range key is not what was assigned during table creation.");
 		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stArgs["tableName"]);
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 	}
 
 
 	public void function tableShouldBeCreatedWithSpecifiedNumericRangeKey() {
 		// Setup an argument collection
 		var stArgs = {};
-		stArgs["tableName"] = "cfdynamo-unit-tests-" & createUUID();
+		stArgs["tableName"] = "cfdynamo-integration-tests-" & createUUID();
 		stArgs["rangeKeyName"] = "myTestHashKeyName";
 		stArgs["rangeKeyType"] = "Numeric";
 		// Create our table with custom read/write provisioning that is NOT the default values
-		var awsTableDescription = CUT.createTable(argumentcollection=stArgs);
-		writeLog(type="information", file="unittests", text="TEST tableShouldBeCreatedWithSpecifiedNumericRangeKey generated this table: #awsTableDescription.toString()#");
-		// Pull the KeySchema out of the TableDescription
-		var awsKeySchema = awsTableDescription.getKeySchema();
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		writeLog(type="information", file="integrationtests", text="TEST tableShouldBeCreatedWithSpecifiedNumericRangeKey generated this table: #stTableDescription.toString()#");
 		// Take a look at the name of the rangeKey, assert that it is what we specified above
-		assertEquals(stArgs["rangeKeyName"], awsKeySchema.getRangeKeyElement().getAttributeName());
+		assertEquals(stArgs["rangeKeyName"], stTableDescription.keys.rangeKey.name, "The returned range key name is not what it was assigned.");
 		// Now assert that it is of the same data type we specified
-		assertEquals(stArgs["rangeKeyType"], awsAttributeValueTypeToCFMLType(awsKeySchema.getRangeKeyElement().getAttributeType()));
+		assertEquals(stArgs["rangeKeyType"], stTableDescription.keys.rangeKey.type, "The returned range key type is not what was assigned.");
 		// Add the table name to our list of created tables so we can delete it at the end of the tests
-		arrayAppend(variables.tablesCreated, stArgs["tableName"]);
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
 	}
 
 
@@ -196,21 +190,25 @@
 	public void function afterTests() {
 		if (arrayLen(variables.tablesCreated)) {
 			// Delete all tables that were made during the integration tests
-			writeLog(type="information", file="unittests", text="Tests have created #arrayLen(variables.tablesCreated)# - starting while loop to delete them.");
+			writeLog(type="information", file="integrationtests", text="Tests have created #arrayLen(variables.tablesCreated)# - starting while loop to delete them in another thread.");
+
 			for (var table in variables.tablesCreated) {
 				// Check to see that the status is active - we can't delete a table that's being created, and it takes
 				// up to a minute for the creation to complete. Note that this will slow down the completion fo the test.
-				do {
-					var nSleepLength = 3500;
-					sleep(nSleepLength);
-					// Log this for debug purposes. I hate when good loops go bad and you don't know why.
-					writeLog(type="information", file="unittests", text="Sleeping for #nSleepLength#ms waiting for table #table#'s status, which is now #CUT.getTableInformation(table).status#, to be ACTIVE.");
-				} while (CUT.getTableInformation(table).status != "ACTIVE");
-				// If we made it here, we're out of the loop and the table is active, which is to say it's ready to be deleted
-				CUT.deleteTable(table);
+				// Do all this in async threads so we don't have to wait too long for test results.  That's annoying.
+				thread action="run" name="delete-#table#" table="#table#" checkinterval="4000" CUT="#CUT#" {
+					do {
+						sleep(checkinterval);
+						// Log this for debug purposes. I hate when good loops go bad and you don't know why.
+						writeLog(type="information", file="integrationtests", text="Thread for deleting #table# is sleeping for #checkinterval#ms waiting for an ACTIVE status. Current status: #CUT.getTableInformation(table).status#");
+					} while (CUT.getTableInformation(table).status != "ACTIVE");
+					// If we made it here, we're out of the loop and the table is active, which is to say it's ready to be deleted
+					writeLog(type="information", file="integrationtests", text="Thread for deleting #table# sees its status is ACTIVE now. Proceeding with the deletion.");
+					CUT.deleteTable(table);
+				}
 			}
 		}
-		writeLog(type="information", file="unittests", text="Closing unit tests for #this.name# at #now()#.");
+		writeLog(type="information", file="integrationtests", text="Closing unit tests for #this.name# at #now()#.");
 	}
 /*
 	public void function test_list_tables(){

@@ -5,3 +5,4 @@ quickie.cfm
 /aws_credentials.xml
 /WEB-INF
 *.sublime-workspace
+/CFIDE/
