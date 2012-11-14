@@ -1,5 +1,4 @@
 /**
-* @accessors true
 * @displayname CFML Amazon AWS DynamoDB Client
 * @hint I handle interactions with an Amazon SDK DynamoDB instance.  To use me, you must have the Amazon SDK jar file in the classpath.
 */
