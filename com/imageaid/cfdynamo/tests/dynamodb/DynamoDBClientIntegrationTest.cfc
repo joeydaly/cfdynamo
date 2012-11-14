@@ -17,7 +17,7 @@
 	public void function beforeTests() {
 		// Start tracking all tables that are created so we can delete them when we're done.
 		variables.tablesCreated = [];
-		writeLog(type="information", file="integrationtests", text="Starting unit tests for #this.name# at #now()#.");
+		writeLog(type="information", file="integrationtests", text="Starting integration tests for #this.name# at #now()#.");
 	}
 
 
@@ -157,6 +157,73 @@
 	}
 
 
+	public void function updateTableShouldOverwriteSpecifiedTableAttributes() {
+		// Setup arg collection
+		var stArgs = {};
+		stArgs["tableName"] = "cfdynamo-integrationtest-updateTable-#hour(now())#-#minute(now())#-#getTickCount()#";
+		stArgs["readCapacity"] = 8;
+		stArgs["writeCapacity"] = 6;
+		// First we need to create the table.  Afterwards we will update it and make assertions
+		var stTableDescription = CUT.createTable(argumentcollection=stArgs);
+		// Now engage a while loop because we need to wait until the status of the table is ACTIVE to perform the update
+		do {
+			sleep(1000);
+		} while (CUT.getTableInformation(stTableDescription.tableName).status != "ACTIVE");
+		// If we made it here past the while loop, we're ready to update the table. Modify our read and write capacity
+		stArgs["readCapacity"] = 6;
+		stArgs["writeCapacity"] = 4;
+		var blnSuccess = CUT.updateTable(argumentcollection=stArgs);
+		// Make sure we received a true
+		assertTrue(blnSuccess, "The response from the updateTable method was not true, and should have been.");
+		// Also make sure that the table now has those new properties.  We will need another while loop because the table
+		// will have entered an UPDATING status as it re-provisions the capacity.
+		do {
+			sleep(330);
+		} while (CUT.getTableInformation(stTableDescription.tableName).status != "ACTIVE");
+		// Ok, get the table information so we can make assertions
+		var stUpdatedTableDescription = CUT.getTableInformation(stTableDescription.tableName);
+		assertEquals(stArgs["readCapacity"], stUpdatedTableDescription.readCapacity, "The read capacity reported from the service is not the new updated value.");
+		assertEquals(stArgs["writeCapacity"], stUpdatedTableDescription.writeCapacity, "The write capacity reported from the service is not the new updated value.");
+		// Add the table name to our list of created tables so we can delete it at the end of the tests
+		arrayAppend(variables.tablesCreated, stTableDescription.tableName);
+	}
+
+
+	public void function listTablesShouldReturnArrayOfTableNamesWhenThereAreTables() {
+		fail("Test not implemented.");
+	}
+
+
+	public void function deleteTableShouldChangeStatusOfActiveTableToDeleting() {
+		fail("Test not implemented.");
+	}
+
+
+	public void function putItemShouldAddItemIntoSpecifiedTable() {
+		fail("Test not implemented.");
+	}
+
+
+	public void function getItemShouldReturnRequestedItem() {
+		fail("Test not implemented.");
+	}
+
+
+	public void function deleteItemShouldRemoveSpecifiedItemFromTable() {
+		fail("Test not implemented.");
+	}
+
+
+	public void function batchPutItemsShouldInsertAllSentItemsIntoTable() {
+		fail("Test not implemented.");
+	}
+
+
+	public void function batchDeleteItemsShouldRemoveAllSpecifiedItemsFromTable() {
+		fail("Test not implemented.");
+	}
+
+
 
 	/** Private helper methods, these are not tests **/
 
@@ -208,7 +275,7 @@
 				}
 			}
 		}
-		writeLog(type="information", file="integrationtests", text="Closing unit tests for #this.name# at #now()#.");
+		writeLog(type="information", file="integrationtests", text="Closing integration tests for #this.name# at #now()#.");
 	}
 /*
 	public void function test_list_tables(){
