@@ -31,7 +31,7 @@
 	    <p><strong id="deleteTableNameHolder"></strong></p>
 	  </div>
 	  <div class="modal-footer">
-	    <a href="##" class="btn">Cancel</a>
+	    <button type="button" class="btn" data-dismiss="modal">Cancel</button>
 	    <a href="##" class="btn btn-danger">Delete</a>
 	  </div>
 	</div>
@@ -56,7 +56,7 @@
 		</p>
 	  </div>
 	  <div class="modal-footer">
-	    <button type="button" data-dismiss="modal">Ok</button>
+	    <button type="button" class="btn" data-dismiss="modal">Ok</button>
 	  </div>
 	</div>
 

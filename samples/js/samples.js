@@ -36,6 +36,7 @@ $(document).ready(function(){
 });
 
 function confirmTableDelete(e) {
+	e.preventDefault();
 	var sTableName = $(e.currentTarget).closest("tr").children("td.tableName").text();
 	$("div.modal-body strong#deleteTableNameHolder").html(sTableName);
 	$("div.modal-footer a.btn-danger").click(function(e){
@@ -47,6 +48,7 @@ function confirmTableDelete(e) {
 }
 
 function showTableInfo(e) {
+	e.preventDefault();
 	var sTableName = $(e.currentTarget).closest("tr").children("td.tableName").text();
 	$.getJSON("tableInfo.cfm?table=" + sTableName, function(r){
 		$("div.modal-body span.tableName").text(r.tableName);
