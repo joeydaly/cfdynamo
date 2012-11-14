@@ -65,8 +65,10 @@ component
 	}
 
 
+	/**
+	 * @mxunit:expectedException "com.amazonaws.AmazonServiceException"
+	 **/
 	public void function createTableWithEmptyNameShouldThrowException()
-		mxunit:expectedException="com.amazonaws.AmazonServiceException"
 	{
 		// Mock the Java client itself and redefine the createTable function to skip any outreach to actual AWS services,
 		// and basically setup the very table information we asked it to set in the first place.
@@ -476,8 +478,10 @@ component
 	/** Tests for batchPutItems **/
 
 
+	/**
+	 * @mxunit:expectedException "API.InvalidParameters"
+	 **/
 	public Void function batchPutItemsShouldThrowExceptionWhenGivenZeroItems()
-		mxunit:expectedException="API.InvalidParameters"
 	{
 		// Setup an argument collection
 		var stArgs = {};
@@ -529,7 +533,7 @@ component
 		// assert that the method has been called twice.
 		var oHashMapMock = variables.mockBox.createStub();
 		oHashMapMock.$("getUnprocessedItems", aAwsItems);
-		oHashMapMock.$("size").$results(4, 0)
+		oHashMapMock.$("size").$results(4, 0);
 		oAWSMock.$("batchWriteItem", createObject("java", "com.amazonaws.services.dynamodb.model.BatchWriteItemResult")
 				.init()
 				.withUnprocessedItems(oHashMapMock)
@@ -545,8 +549,10 @@ component
 	}
 
 
+	/**
+	 * @mxunit:expectedException "API.InvalidParameters"
+	 **/
 	public Void function batchDeleteItemsShouldThrowExceptionWhenGivenZeroItems()
-		mxunit:expectedException="API.InvalidParameters"
 	{
 		// Setup an argument collection
 		var stArgs = {};
@@ -589,7 +595,7 @@ component
 		// assert that the method has been called twice.
 		var oHashMapMock = variables.mockBox.createStub();
 		oHashMapMock.$("getUnprocessedItems", aAwsItems);
-		oHashMapMock.$("size").$results(4, 0)
+		oHashMapMock.$("size").$results(4, 0);
 		oAWSMock.$("batchWriteItem", createObject("java", "com.amazonaws.services.dynamodb.model.BatchWriteItemResult")
 				.init()
 				.withUnprocessedItems(oHashMapMock)

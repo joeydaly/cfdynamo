@@ -13,7 +13,7 @@ component
 	property name="awsKey" type="string" hint="The AWS Key";
 	property name="awsSecret" type="string" hint="The AWS Secret";
 	property name="awsCredentials" type="object";
-	property name="awsDynamoDBClient" type="object";
+	property name="awsDynamoDBClient" type="any";
 
 	variables.awsKey = "";
 	variables.awsSecret = "";
