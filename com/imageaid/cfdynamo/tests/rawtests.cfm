@@ -15,7 +15,7 @@
 	// sTableName = "cfdynamotabletest";
 	// sTableName = "temptest01";
 	// sTableName = "Forum";
-	sTableName = "ProductCatalog";
+	// sTableName = "ProductCatalog";
 	// sTableName = "Reply";
 
 	// -- CREATE TABLE --
