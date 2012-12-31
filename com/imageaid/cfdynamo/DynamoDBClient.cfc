@@ -3,46 +3,129 @@
 * @hint I handle interactions with an Amazon SDK DynamoDB instance.  To use me, you must have the Amazon SDK jar file in the classpath.
 */
 component
-
 	accessors="true"
 	output="false"
+	singleton="true"
 
 {
 
 
-	property name="awsKey" type="string" hint="The AWS Key";
-	property name="awsSecret" type="string" hint="The AWS Secret";
-	property name="awsCredentials" type="object";
-	property name="awsDynamoDBClient" type="any";
 
-	variables.awsKey = "";
-	variables.awsSecret = "";
+	/**
+	* @hint Variable to contain the singleton instance of the AWS SDK Client
+	*/
+	property name="awsDynamoDBClient" type="Any";
 
 
 	/**
-	* @displayname Initialize
+
+	CONSTRUCTOR
+
+	**/
+
+
+	/**
+	* @displayName Initialize
 	* @hint Returns an initialized instance of this class.  It is intended to be instantiated and used most optimally as a singleton.
 	*/
 	public DynamoDBClient function init(
-			required string awsKey
-			, required string awsSecret
-			, boolean useHTTPS=false
-			, string awsZone="us-east-1")
+		required String awsKey
+		,required String awsSecret
+		,Boolean useHTTPS=false
+		,String awsZone="us-east-1")
 	{
-		variables.awsKey = trim(arguments.awsKey);
-		variables.awsSecret = trim(arguments.awsSecret);
-		variables.awsCredentials = createObject("java","com.amazonaws.auth.BasicAWSCredentials").init(variables.awsKey, variables.awsSecret);
-		variables.awsDynamoDBClient = createObject("java","com.amazonaws.services.dynamodb.AmazonDynamoDBClient").init(awsCredentials);
-		if (arguments.useHTTPS)
-		{
-			variables.awsDynamoDBClient.setEndpoint("http://dynamodb.#trim(arguments.awsZone)#.amazonaws.com");
-		}
+		// Cleanup and prepare the initializstion parameters
+		var local.awsKey = trim(arguments.awsKey);
+		var local.awsSecret = trim(arguments.awsSecret);
+		var local.awsZone = trim(arguments.awsZone);
+		var local.useHTTPS = trim(arguments.useHTTPS);
+
+		// Vaildate credentials, make sure they're not empty or something silly like that.
+		validateCredentials(awsKey=local.awsKey, awsSecret=local.awsSecret);
+
+		// Initialize the Java AWS SDK DynamoDB Client that is used in all core functions
+		variables.awsDynamoDBClient = initClient(awsKey=local.awsKey, awsSecret=local.awsSecret);
+
+		// Initialize the endpoint (it can vary based on our SSL security parameter)
+		initEndpoint(
+			useHTTPS=local.useHTTPS
+			,awsZone=local.awsZone
+			,awsDynamoDBClient=variables.awsDynamoDBClient);
+
 		return this;
 	}
 
 
 	/**
-	* @displayname Create Table
+	* @displayName Validate Credentials
+	* @hint Ensure the supplied credentials are proper enough to bother sending upstream for authentication
+	*/
+	private Void function validateCredentials(
+		required String awsKey
+		,required String awsSecret)
+	{
+		// Make sure they are not empty strings
+		if (len(arguments.awsKey) == 0) throw(message="The AWSKey setting was not properly injected or is of zero-length.");
+		if (len(arguments.awsSecret) == 0) throw(message="The AWSKey setting was not properly injected or is of zero-length.");
+		// TODO: Examine AWS API to see if there are other validations we can perform like min-length, etc.
+	}
+
+
+	/**
+	* @displayName Initialize Client
+	* @hint Initializes the AWS Java SDK Client, as a singleton, to be used by all the core functons of this library
+	*/
+	private Any function initClient(
+		required String awsKey
+		,required String awsSecret)
+	{
+		var awsCredentials = createObject("java","com.amazonaws.auth.BasicAWSCredentials").init(arguments.awsKey, arguments.awsSecret);
+		var awsDynamoDBClient = createObject("java","com.amazonaws.services.dynamodb.AmazonDynamoDBClient").init(awsCredentials);
+		return awsDynamoDBClient;
+	}
+
+
+	/**
+	* @displayName Initialize Endpoint
+	* @hint Examines the library's initialization parameter and sets a secure or non-secure host endpoint for the SDK to utilize.
+	*/
+	private Void function initEndpoint(
+		required Boolean useHTTPS
+		,required String awsZone
+		,required Any awsDynamoDBClient)
+	{
+		/*
+			There are two possible endpoints for each availability zone, one that is secure and the other that is not.
+			The URL pattern is as follows, using the us-east-1 availability zone as an example:
+
+			http://dynamodb.us-east-1.amazonaws.com
+			https://dynamodb.us-east-1.amazonaws.com
+
+			So based on the incoming useHTTPS parameter construct the endpoint string and assign it to the client.
+
+			// TODO: See if the AWS API provides a more concrete way to determine the endpoint. This feels shady.
+		*/
+		if (arguments.useHTTPS)
+		{
+			arguments.awsDynamoDBClient.setEndpoint("https://dynamodb.#arguments.awsZone#.amazonaws.com");
+		}
+		else
+		{
+			// Do nothing, the default setting is the non-secure, this is just an override if secure is desired.
+		}
+		return;
+	}
+
+
+	/**
+
+	CORE FUNCTIONS
+
+	**/
+
+
+	/**
+	* @displayName Create Table
 	* @hint Creates a new DynamoDB table. The return is an instance of the TableDescription AWS Java class.  Use the toString method on it for simple info about the table that was just created.
 	*/
 	public Any function createTable(
@@ -133,6 +216,7 @@ component
         	.withTableName(pargs["tableName"]);
         var result = awsDynamoDBClient.describeTable(awsDescribeTableRequest);
         var awsTableDescription = result.getTable();
+
 		// Return the result as a struct
 		return convertAWSTableDescriptionToStruct(awsTableDescription);
     }
@@ -253,7 +337,20 @@ component
 			.withTableName(pargs.tableName)
 			.withItem(struct_to_dynamo_map(pargs.item))
 			.withReturnValues(createObject("java", "com.amazonaws.services.dynamodb.model.ReturnValue").ALL_OLD);
-		var awsPutItemResult = variables.awsDynamoDBClient.putItem(awsPutItemRequest);
+		try {
+			var awsPutItemResult = variables.awsDynamoDBClient.putItem(awsPutItemRequest);
+		} catch(any e)
+		{
+			switch(e.message)
+			{
+				case 'Requested resource not found':
+					throw(message="AWS Threw a  Requested resource not found (com.amazonaws.services.dynamodb.model.ResourceNotFoundException : ResourceNotFoundException) Exception",detail="Please verify the table #arguments.tableName# exists in DynamoDB.");
+				break;
+				default:
+					rethrow;
+				break;
+			}
+		}
 
 		// TODO: It could be beneficial here to log the consumed capacity, since it's present in the result
 
@@ -327,42 +424,94 @@ component
 		, Any rangeKey hint="Optional, if defined it will be used in conjunction with the hashKey to identify the record that is to be retrieved"
 		, String attributeNames hint="Optional comma separated list of attribute names. If attribute names are not specified then all attributes will be returned. If some attributes are not found, they will not appear in the result.")
 	{
-		// Set up a protected, sanitized version of the arguments scope
-		var pargs = {};
-		pargs["tableName"] = trim(arguments.tableName);
-		pargs["hashKey"] = trim(arguments.hashKey);
-		if (structKeyExists(arguments, "rangeKey")) pargs["rangeKey"] = trim(arguments.rangeKey);
-		if (structKeyExists(arguments, "attributeNames")) pargs["attributeNames"] = arguments.attributeNames;
+		request.logger(variables.logger,'info','getItem:Logging HashKey',arguments.hashKey);
+		try {
+			// Set up a protected, sanitized version of the arguments scope
+			var pargs = {};
+			pargs["tableName"] = trim(arguments.tableName);
+			pargs["hashKey"] = trim(arguments.hashKey);
+			if (structKeyExists(arguments, "rangeKey")) pargs["rangeKey"] = trim(arguments.rangeKey);
+			if (structKeyExists(arguments, "attributeNames")) pargs["attributeNames"] = arguments.attributeNames;
 
-		// Initialize the key object that identifies the key, in term the AWS SDK understands
-		var awsKey = createKey(pargs["hashKey"]);
+			// Initialize the key object that identifies the key, in term the AWS SDK understands
+			var awsKey = createKey(pargs["hashKey"]);
 
-		// If we have a rangeKey specified, add that to our key instance
-		if (structKeyExists(pargs, "rangeKey"))
-		{
-			awsKey.setRangeKeyElement(createAttributeValue(pargs.rangeKey));
-		}
-		// Create our get item request that will be sent to the AWS services
-		var awsGetItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.GetItemRequest").init()
-			.withTableName(pargs.tableName)
-			.withKey(awsKey);
-		// If attribute names were specified for the return, set those in the get item request
-		if (structKeyExists(pargs, "attributeNames") && listLen(pargs["attributeNames"]) > 0)
-		{
-			awsGetItemRequest.setAttributesToGet(listToArray(pargs["attributeNames"]));
-		}
-		var result = variables.awsDynamoDBClient.getItem(awsGetItemRequest);
-		var item = result.getItem();
+			// If we have a rangeKey specified, add that to our key instance
+			if (structKeyExists(pargs, "rangeKey"))
+			{
+				awsKey.setRangeKeyElement(createAttributeValue(pargs.rangeKey));
+			}
+			// Create our get item request that will be sent to the AWS services
+			var awsGetItemRequest = createObject("java", "com.amazonaws.services.dynamodb.model.GetItemRequest").init()
+				.withTableName(pargs.tableName)
+				.withKey(awsKey);
+			// If attribute names were specified for the return, set those in the get item request
+			if (structKeyExists(pargs, "attributeNames") && listLen(pargs["attributeNames"]) > 0)
+			{
+				awsGetItemRequest.setAttributesToGet(listToArray(pargs["attributeNames"]));
+			}
+			var result = variables.awsDynamoDBClient.getItem(awsGetItemRequest);
+			var item = result.getItem();
 
-		// If the requested item was not found, our item var will now be null
-		if (!isDefined("item"))
-		{
-			throw(type="API.AWS.DynamoDB.RecordNotFound", message="The record you're looking for with identifier '#pargs.hashKey#' cannot be found.");
+			// If the requested item was not found, our item var will now be null
+			if (!isDefined("item"))
+			{
+				// TODO: ideally, Hoth would be tracking these issues.
+				request.logger(variables.logger,'info','getItem:API.AWS.DynamoDB.RecordNotFound. HashKey',arguments.hashKey);
+				throw(type="API.AWS.DynamoDB.RecordNotFound", message="The record you're looking for with identifier '#pargs.hashKey#' cannot be found.");
+			}
+			request.logger(variables.logger,'info','getItem:Item found',arguments.hashKey);
+			// Return the item, converted into a native CFML struct
+		} catch (any e) {
+			writeDump(var=arguments);
+			writeDump(var=e,abort=1,label='DynamoDBClient.getItem()');
 		}
-		// Return the item, converted into a native CFML struct
 		return dynamo_to_struct_map(item);
 	}
 
+
+	public void function batchGet(
+		required shared.model.AWS.DynamoDBBatchGetHelper DynamoDBBatchGetHelper
+	){
+		var AWSResult = [];
+		var BatchGetItemsRequest = DynamoDBBatchGetHelper.getBatchGetItemRequest(); // Get a reference to this section of the object.
+
+		for(batch in BatchGetItemsRequest){
+			var leftoverKeys = duplicate(batch.keys); // Used for tracking.
+			do {
+				var AWSResult = variables.awsDynamoDBClient.batchGetItem(batch.ItemRequest);
+				var responses = AWSResult.getResponses();
+
+				for(var reponse in responses){
+					try{
+						for(var item in responses[reponse].getItems()){
+
+							var id = item['id'].getS();
+							var content = item['content'].getS();
+							// Add data to the helper records.
+							DynamoDBBatchGetHelper.addRecord( batch.TableName, id, content );
+
+							var position = batch.keys.indexOf(id);
+							if(position >= 0){
+								arrayDeleteAt(leftoverKeys, incrementValue(position)); // Holy crap, we're still using array[1] as a starting point in cfml?!
+							}
+						}
+					}catch (any e){
+						// blergh? Why doesn't the response object have something freaking useful like, hasRecord() or something? :P
+					};
+					// TODO: TR - Handle AWSResult.getUnprocessedKeys() correctly.
+				}
+			} while (AWSResult.getUnprocessedKeys().size() > 0);
+
+			if(arrayLen(leftoverKeys))
+			{
+				DynamoDBBatchGetHelper.Omit(batch.TableName, leftoverKeys); // report bad keys to DynamoDBBatchGetHelper
+				request.logger(variables.logger,'info','batchGet unable to obtain these records.',batch.keys);
+			}
+		}
+
+		return;
+	}
 
 	/**
 	* @displayname Delete Item
@@ -585,8 +734,6 @@ component
 		return dynamoItemCollectionToStructCollection(result.getItems());
 	}
 
-
-
 	/**
 
 	PRIVATE METHODS
@@ -649,70 +796,107 @@ component
 	}
 
 
-	public Any function struct_to_dynamo_map(required struct cf_structure){
+	public Any function struct_to_dynamo_map(required struct cf_structure) {
 		var dynamo_map = createObject("java","java.util.HashMap").init();
-		var val = "";
 		for (var key in arguments.cf_structure )
 		{
-			val = arguments.cf_structure[key];
-
-			// Perform type detection tests
-			if (isNumeric(val))
-			{
-				dynamo_map.put(
-					"#key#",
-					createObject("java","com.amazonaws.services.dynamodb.model.AttributeValue").init().withN(val)
-				);
+			try {
+				// Create an AttributeValue instance and put it into the hash map
+				var oAV = createAttributeValue(arguments.cf_structure[key]);
+				dynamo_map.put("#key#", oAV);
 			}
-			else if (isBinary(val))
-			{
-				// Binary objects have their own way of being dealt with
-				dynamo_map.put(
-					"#key#",
-					createObject("java","com.amazonaws.services.dynamodb.model.AttributeValue").init().withB(val)
-				);
-
+			catch("API.DataMissing" e) {
+				// No need to panic. This exception coming from the createAttributeValue function simply means
+				// it was given an empty string and that's not allowed with AttributeValue instances. Ignore this.
 			}
-			else if (isArray(val))
-			{
-				// Arrays are adapted into Java sets, which are similar but not quite the same.  Regardless, DDB can
-				// work with sets of strings or sets of numbers, so let's use the first item in the array to test for
-				// numeric-ness.
-				if (areAllValuesNumeric(val))
-				{
-					// So far so good.  Let's roll with a numeric set, but fail to a string set
-					dynamo_map.put(
-						"#key#",
-						createObject("java","com.amazonaws.services.dynamodb.model.AttributeValue").init().withNS(val)
-					);
-				}
-				else if (areAllValuesBinary(val))
-				{
-					// So far so good.  Let's roll with a numeric set, but fail to a string set
-					dynamo_map.put(
-						"#key#",
-						createObject("java","com.amazonaws.services.dynamodb.model.AttributeValue").init().withBS(val)
-					);
-				}
-				else
-				{
-					// Not numeric, use a string set
-					dynamo_map.put(
-						"#key#",
-						createObject("java","com.amazonaws.services.dynamodb.model.AttributeValue").init().withSS(val)
-					);
-				}
-			}
-			else
-			{
-				// It's neither numeric or an array, so let's treat it as a string
-				dynamo_map.put(
-					"#key#",
-					createObject("java","com.amazonaws.services.dynamodb.model.AttributeValue").init().withS("#val#")
-				);
+			catch(Any e) {
+				throw(type="API.DataTranslationError", message="DynamoDBClient: AWS Attribute Mapping Issue. Key #key# with value '#serializeJSON(arguments.cf_structure[key])#' fails. Accepted types: Strings, Numerics, Arrays", detail="AWS SDK Exception: #e.type# :: #e.message# :: #e.detail#");
 			}
 		}
 		return dynamo_map;
+	}
+
+
+	/**
+	* @author Adam Bellas
+	* @output false
+	* @displayname Create Item Key
+	* @hint Converts a numeric or string attribute value (detects the type) and creates an appropriately infused instance of the AWS SDK AttributeValue class that can then be used against other methods that target single records in any table (i.e. getItem, deleteItem, etc.)
+	*/
+	private Any function createAttributeValue(
+		required Any itemValue hint="Struct, Array, Binary, Numeric or String value that needs to be converted into a valid AttributeValue instance for DynamoDB")
+	{
+		// We need to detect whether or not a string or numeric key has been passed in so we can properly
+		// detect the kind of AttributeValue to create.
+		var awsAttributeValue = createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init();
+		//....................................................................................
+		//							Perform type detection tests
+		//....................................................................................
+		// Start by checking to see if our current value is an embedded struct, which typically indicates
+		// that the key stores a sub-entity instance (e.g. a Resource might have an embedded Product).
+		// We'll rip out the uuid from that sub object and embed that in the key in place of the struct.
+		if (isStruct(itemValue)) {
+			if (StructIsEmpty(itemValue)) {
+				throw(type="API.DataMissing", message="A DynamoDB AttributeValue will not allow empty values. An empty structure was submitted to be converted into an AttributeValue instance.", detail="This is more of a warning than an error, however it is thrown from the createAttributeValue function and thus defines an exception during the mission to provide what was requested.  Calling code should handle this scenario appropriately.");
+			}
+			// We know we have a struct, but not sure if it is an entity yet. Check for uuid.
+			if (structKeyExists(itemValue, "uuid")) {
+				// Now it's official.  We have an entity. Put the uuid in this struct's place
+				awsAttributeValue.setS(javaCast("string", itemValue["uuid"]));
+			} else {
+				// Okay, it's a struct, but not an entity. We don't want to lose it, so to be careful with
+				// our data let's serialize it into JSON and store it as a string. Not optimal, but safe.
+				awsAttributeValue.setS(javaCast("string", serializeJSON(itemValue)));
+			}
+		}
+		else if (isArray(itemValue))
+		{
+			if (arrayLen(itemValue) == 0) {
+				throw(type="API.DataMissing", message="A DynamoDB AttributeValue will not allow empty values. An empty array was submitted to be converted into an AttributeValue instance.", detail="This is more of a warning than an error, however it is thrown from the createAttributeValue function and thus defines an exception during the mission to provide what was requested.  Calling code should handle this scenario appropriately.");
+			}
+			// Arrays are adapted into Java sets, which are similar but not quite the same.  Regardless, DDB can
+			// work with sets of strings or sets of numbers, so let's use the first item in the array to test for
+			// numeric-ness.
+			if (areAllValuesNumeric(itemValue)) {
+				// So far so good.  Let's roll with a numeric set, but fail to a string set
+				awsAttributeValue.setNS(itemValue);
+			}
+			else if (areAllValuesBinary(itemValue)) {
+				// So far so good.  Let's roll with a binary set, but fail to a string set
+				awsAttributeValue.setBS(itemValue);
+			}
+			else {
+				// Not numeric, use a string set
+				awsAttributeValue.setSS(itemValue);
+			}
+		}
+		else if (isBinary(itemValue)) {
+			// Binary objects have their own way of being dealt with
+			awsAttributeValue.setB(itemValue);
+		}
+		// Now check for a numeric value.  Be careful here and don't let the AWS SDK fool you.  Even
+		// though the type is numeric, the AWS SDK will cast this as a string for transport to the service.
+		else if (isNumeric(arguments.itemValue)) {
+			// Set the N value
+			awsAttributeValue.setN(javaCast("string", arguments.itemValue));
+		}
+		else {
+			// THE CATCH-ALL - Set the S value, assuming anything that hasn't been identified as another type is a string.
+			// NOTE: The AWS AttributeValue class doesn't allow empty strings.  Throw an exception if it's empty.
+			if (len(trim(arguments.itemValue)) == 0) {
+				throw(type="API.DataMissing", message="A DynamoDB AttributeValue will not allow empty string values, which is what was submitted to be converted into an AttributeValue instance.", detail="This is more of a warning than an error, however it is thrown from the createAttributeValue function and thus defines an exception during the mission to provide what was requested.  Calling code should handle this scenario appropriately.");
+			}
+			// Add in some special date handling.  We will be using UTC style date strings in the DB
+			// TODO: If this is a date, shouldn't it be converted to UTC time first?
+			if (isDate(arguments.itemValue)) awsAttributeValue.setS(
+				dateFormat(arguments.itemValue, "yyyy-mm-dd")
+				& 'T'
+				& timeFormat(arguments.itemValue, "HH:mm:ss.SSS")
+				& 'Z'
+			);
+			else awsAttributeValue.setS(javaCast("string", arguments.itemValue));
+		}
+		return awsAttributeValue;
 	}
 
 
@@ -739,37 +923,6 @@ component
 		}
 		// If we made it this far, all the items in the array are binary, so return true
 		return true;
-	}
-
-
-	/**
-	* @author Adam Bellas
-	* @output false
-	* @displayname Create Item Key
-	* @hint Converts a numeric or string attribute value (detects the type) and creates an appropriately infused instance of the AWS SDK AttributeValue class that can then be used against other methods that target single records in any table (i.e. getItem, deleteItem, etc.)
-	*/
-	private Any function createAttributeValue(
-		required Any itemValue hint="Numeric or string value that needs to be converted into a valid AttributeValue instance for DynamoDB")
-	{
-		// We need to detect whether or not a string or numeric key has been passed in so we can properly
-		// detect the kind of AttributeValue to create.
-		var awsAttributeValue = createObject("java", "com.amazonaws.services.dynamodb.model.AttributeValue").init();
-		if (isNumeric(arguments.itemValue)) {
-			// Set the N value
-			awsAttributeValue.setN(arguments.itemValue);
-		}
-		else {
-			// Set the S value, assuming non-numeric values to be strings
-			// TODO: Apply further validation on arguments.itemValue to ensure it's either string or numeric. We shouldn't allow someone to shove an array or something in there and muck up the works.
-			if (isDate(arguments.itemValue)) awsAttributeValue.setS(
-				dateFormat(arguments.itemValue, "yyyy-mm-dd")
-				& 'T'
-				& timeFormat(arguments.itemValue, "HH:mm:ss.SSS")
-				& 'Z'
-			);
-			else awsAttributeValue.setS(arguments.itemValue);
-		}
-		return awsAttributeValue;
 	}
 
 
@@ -857,34 +1010,38 @@ component
     {
         // The TableDescription instance is messy for ColdFusion so let's map
         // it to a basic struct with the properties of the table as keys
-		var stTableInfo = {};
-		stTableInfo["tableName"] = arguments.awsTableDescription.getTableName();
-		var sStatus = arguments.awsTableDescription.getTableStatus();
-		if (isDefined("sStatus")) {
-			stTableInfo["status"] = arguments.awsTableDescription.getTableStatus();
-		}
-		var awsProvisionedThroughput = arguments.awsTableDescription.getProvisionedThroughput();
-		if (isDefined("awsProvisionedThroughput")) {
-			stTableInfo["readCapacity"] = awsProvisionedThroughput.getReadCapacityUnits();
-			stTableInfo["writeCapacity"] = awsProvisionedThroughput.getWriteCapacityUnits();
-		}
-		stTableInfo["keys"] = {};
-		stTableInfo["keys"]["hashKey"] = {};
-		var awsKeySchema = arguments.awsTableDescription.getKeySchema();
-		if (isDefined("awsKeySchema")) {
-			var awsHashKeyElement = awsKeySchema.getHashKeyElement();
-			stTableInfo["keys"]["hashKey"]["name"] = awsHashKeyElement.getAttributeName();
-			stTableInfo["keys"]["hashKey"]["type"] = awsAttributeValueTypeToCFMLType(awsHashKeyElement.getAttributeType());
-			var awsRangeKeyElement = awsKeySchema.getRangeKeyElement();
-			if (isDefined("awsRangeKeyElement")) {
-				stTableInfo["keys"]["rangeKey"] = {};
-				stTableInfo["keys"]["rangeKey"]["name"] = awsRangeKeyElement.getAttributeName();
-				stTableInfo["keys"]["rangeKey"]["type"] = awsAttributeValueTypeToCFMLType(awsRangeKeyElement.getAttributeType());
-			}
-		}
-		return stTableInfo;
-    }
+        var AWSTableDesc = arguments.awsTableDescription;
+        var KeySchema = AWSTableDesc.getKeySchema();
+        var readCapacity = AWSTableDesc.getProvisionedThroughput().getReadCapacityUnits();
+        var writeCapacity = AWSTableDesc.getProvisionedThroughput().getWriteCapacityUnits();
 
+		var tableInfo = {
+			'tableName' = AWSTableDesc.getTableName()
+			,'creationDateTime' = AWSTableDesc.getCreationDateTime()
+			,'itemCount' = AWSTableDesc.getItemCount()
+			,'TableStatus' =  AWSTableDesc.getTableStatus()
+			,'hashCode' =  AWSTableDesc.hashCode()
+			,'ProvisionedThroughput' = {
+					'read' = (isDefined("readCapacity")) ? AWSTableDesc.getProvisionedThroughput().getReadCapacityUnits() : "undefined"
+					,'write' = (isDefined("writeCapacity")) ? writeCapacity : "undefined"
+			}
+			,'keys' = {
+				'hashKey' = {
+					'name' = KeySchema.getHashKeyElement().getAttributeName()
+					,'type' = KeySchema.getHashKeyElement().getAttributeType()
+				}
+			}
+		};
+
+		try{
+			tableInfo['keys']['RangeKey'] = KeySchema.getRangeKeyElement().getAttributeName();
+			tableInfo['keys']['RangeKey'] = KeySchema.getRangeKeyElement().getAttributeType();
+		}catch (any e){
+			// Range key doesn't exist.
+		}
+
+		return tableInfo;
+    }
 
 	/**
 	 * @author Adam Bellas
@@ -908,5 +1065,8 @@ component
 	}
 
 
+	private Array function listConditionOperators() {
+		return ["BEGINS_WITH", "BETWEEN", "CONTAINS", "EQ", "GE", "GT", "IN", "LE", "LT", "NE", "NOT_CONTAINS", "NOT_NULL", "NULL"];
+	}
 
 }
