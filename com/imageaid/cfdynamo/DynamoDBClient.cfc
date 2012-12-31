@@ -1019,9 +1019,9 @@ component
 			'tableName' = AWSTableDesc.getTableName()
 			,'creationDateTime' = AWSTableDesc.getCreationDateTime()
 			,'itemCount' = AWSTableDesc.getItemCount()
-			,'TableStatus' =  AWSTableDesc.getTableStatus()
+			,'tableStatus' =  AWSTableDesc.getTableStatus()
 			,'hashCode' =  AWSTableDesc.hashCode()
-			,'ProvisionedThroughput' = {
+			,'provisionedThroughput' = {
 					'read' = (isDefined("readCapacity")) ? AWSTableDesc.getProvisionedThroughput().getReadCapacityUnits() : "undefined"
 					,'write' = (isDefined("writeCapacity")) ? writeCapacity : "undefined"
 			}

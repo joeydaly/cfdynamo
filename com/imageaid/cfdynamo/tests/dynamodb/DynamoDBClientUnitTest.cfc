@@ -113,6 +113,14 @@ component
 					.withReadCapacityUnits(stArgs["readCapacity"])
 					.withWriteCapacityUnits(stArgs["writeCapacity"])
 				)
+				.withKeySchema(createObject("java", "com.amazonaws.services.dynamodb.model.KeySchema")
+					.init()
+					.withHashKeyElement(createObject("java", "com.amazonaws.services.dynamodb.model.KeySchemaElement")
+						.init()
+						.withAttributeName("testStringHashKey")
+						.withAttributeType(CFMLTypeToAWSAttributeValueType("String"))
+					)
+				)
 			)
 		);
 		CUT.setAwsDynamoDBClient(oAWSMock);
@@ -120,8 +128,8 @@ component
 		// Create our table with custom read/write provisioning that is NOT the default values
 		var stTableInfo = CUT.createTable(argumentcollection=stArgs);
 		// Assert that our returned values from the serice report true
-		assertEquals(stArgs["readCapacity"], stTableInfo["readCapacity"], "The specified read capacity of #stArgs['readCapacity']# doesn't match the read capacity returned from the service's table description.");
-		assertEquals(stArgs["writeCapacity"], stTableInfo["writeCapacity"], "The specified write capacity of #stArgs['writeCapacity']# doesn't match the write capacity returned from the service's table description.");
+		assertEquals(stArgs["readCapacity"], stTableInfo["provisionedThroughput"]["read"], "The specified read capacity of #stArgs['readCapacity']# doesn't match the read capacity returned from the service's table description.");
+		assertEquals(stArgs["writeCapacity"], stTableInfo["provisionedThroughput"]["write"], "The specified write capacity of #stArgs['writeCapacity']# doesn't match the write capacity returned from the service's table description.");
 	}
 
 
